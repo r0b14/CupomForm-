@@ -1,0 +1,11 @@
+{
+  "codex": {
+    "fast": "gpt-5.6-luna",
+    "default": "gpt-5.6-terra",
+    "deep": "gpt-5.6-sol"
+  },
+  "gemini": {
+    "fast": "gemini-3.5-flash",
+    "deep": "gemini-3.6-pro"
+  }
+}

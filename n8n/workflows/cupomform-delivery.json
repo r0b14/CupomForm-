@@ -1,0 +1,359 @@
+{
+  "name": "CupomForm - Entrega de cupom",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cupom-delivery",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a47b1ec0-8c6d-4f0d-a67a-1bb0207a0001",
+      "name": "Webhook - entrega de cupom",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -860,
+        180
+      ],
+      "webhookId": "a47b1ec0-8c6d-4f0d-a67a-1bb0207a0001"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6eea7a1f-1bbf-4d48-bf5c-6e7b8a9c1001",
+              "leftValue": "={{ $json.headers['x-cupomform-secret'] }}",
+              "rightValue": "={{ $env.N8N_SHARED_SECRET }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b57b1ec0-8c6d-4f0d-a67a-1bb0207a0002",
+      "name": "Validar segredo",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -620,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\\\"accepted\\\":true}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "c67b1ec0-8c6d-4f0d-a67a-1bb0207a0003",
+      "name": "Responder aceito",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -360,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\\\"accepted\\\":false,\\\"message\\\":\\\"Unauthorized\\\"}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "d77b1ec0-8c6d-4f0d-a67a-1bb0207a0004",
+      "name": "Responder não autorizado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -360,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e87b1ec0-8c6d-4f0d-a67a-1bb0207a0005",
+              "name": "delivery_id",
+              "value": "={{ $json.body.deliveryId }}",
+              "type": "string"
+            },
+            {
+              "id": "f97b1ec0-8c6d-4f0d-a67a-1bb0207a0006",
+              "name": "submission_id",
+              "value": "={{ $json.body.submissionId }}",
+              "type": "string"
+            },
+            {
+              "id": "0a8c1ec0-8c6d-4f0d-a67a-1bb0207a0007",
+              "name": "coupon_code",
+              "value": "={{ $json.body.couponCode }}",
+              "type": "string"
+            },
+            {
+              "id": "1b9c1ec0-8c6d-4f0d-a67a-1bb0207a0008",
+              "name": "name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "2c0d1ec0-8c6d-4f0d-a67a-1bb0207a0009",
+              "name": "phone",
+              "value": "={{ String($json.body.phone).replace(/\\D/g, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "3d1e1ec0-8c6d-4f0d-a67a-1bb0207a0010",
+              "name": "message",
+              "value": "=Olá, {{ $json.body.name }}! Seu cupom é {{ $json.body.couponCode }}. Guarde este código para usar no estabelecimento.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e87b1ec0-8c6d-4f0d-a67a-1bb0207a0011",
+      "name": "Preparar envio",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -340,
+        170
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.EVOLUTION_API_URL }}/message/sendText/{{ $env.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.EVOLUTION_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\\n  \\\"number\\\": \\\"{{ $json.phone }}\\\",\\n  \\\"text\\\": \\\"{{ $json.message }}\\\"\\n}",
+        "options": {}
+      },
+      "id": "f97b1ec0-8c6d-4f0d-a67a-1bb0207a0012",
+      "name": "Evolution API - enviar texto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        170
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4e2f1ec0-8c6d-4f0d-a67a-1bb0207a0013",
+              "name": "delivery_id",
+              "value": "={{ $node['Preparar envio'].json.delivery_id }}",
+              "type": "string"
+            },
+            {
+              "id": "5f3a1ec0-8c6d-4f0d-a67a-1bb0207a0014",
+              "name": "submission_id",
+              "value": "={{ $node['Preparar envio'].json.submission_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6a4b1ec0-8c6d-4f0d-a67a-1bb0207a0015",
+              "name": "coupon_code",
+              "value": "={{ $node['Preparar envio'].json.coupon_code }}",
+              "type": "string"
+            },
+            {
+              "id": "7b5c1ec0-8c6d-4f0d-a67a-1bb0207a0016",
+              "name": "name",
+              "value": "={{ $node['Preparar envio'].json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "8c6d1ec0-8c6d-4f0d-a67a-1bb0207a0017",
+              "name": "phone",
+              "value": "={{ $node['Preparar envio'].json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "9d7e1ec0-8c6d-4f0d-a67a-1bb0207a0018",
+              "name": "requested_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "ae8f1ec0-8c6d-4f0d-a67a-1bb0207a0019",
+              "name": "delivery_status",
+              "value": "={{ $json.error ? 'FAILED' : 'SENT' }}",
+              "type": "string"
+            },
+            {
+              "id": "bf901ec0-8c6d-4f0d-a67a-1bb0207a0020",
+              "name": "provider_message_id",
+              "value": "={{ $json.key?.id || $json.messageId || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "c0a11ec0-8c6d-4f0d-a67a-1bb0207a0021",
+              "name": "error",
+              "value": "={{ $json.error?.message || $json.error || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0a8c1ec0-8c6d-4f0d-a67a-1bb0207a0022",
+      "name": "Preparar callback e auditoria",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        140,
+        170
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.CUPOMFORM_API_URL }}/api/internal/deliveries/{{ $json.delivery_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-internal-secret",
+              "value": "={{ $env.INTERNAL_CALLBACK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { status: $json.delivery_status, providerMessageId: $json.provider_message_id || undefined, error: $json.error || undefined } }}",
+        "options": {}
+      },
+      "id": "1b9c1ec0-8c6d-4f0d-a67a-1bb0207a0023",
+      "name": "Callback CupomForm",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        390,
+        170
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.GOOGLE_SHEETS_DOCUMENT_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $env.GOOGLE_SHEETS_SHEET_NAME }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "delivery_id": "={{ $node['Preparar callback e auditoria'].json.delivery_id }}",
+            "submission_id": "={{ $node['Preparar callback e auditoria'].json.submission_id }}",
+            "coupon_code": "={{ $node['Preparar callback e auditoria'].json.coupon_code }}",
+            "name": "={{ $node['Preparar callback e auditoria'].json.name }}",
+            "phone": "={{ $node['Preparar callback e auditoria'].json.phone }}",
+            "requested_at": "={{ $node['Preparar callback e auditoria'].json.requested_at }}",
+            "delivery_status": "={{ $node['Preparar callback e auditoria'].json.delivery_status }}",
+            "provider_message_id": "={{ $node['Preparar callback e auditoria'].json.provider_message_id }}",
+            "error": "={{ $node['Preparar callback e auditoria'].json.error }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "delivery_id", "displayName": "delivery_id", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "submission_id", "displayName": "submission_id", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "coupon_code", "displayName": "coupon_code", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "name", "displayName": "name", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "phone", "displayName": "phone", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "requested_at", "displayName": "requested_at", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "delivery_status", "displayName": "delivery_status", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "provider_message_id", "displayName": "provider_message_id", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "error", "displayName": "error", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2c0d1ec0-8c6d-4f0d-a67a-1bb0207a0024",
+      "name": "Google Sheets - auditoria",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        650,
+        170
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - entrega de cupom": {
+      "main": [[{ "node": "Validar segredo", "type": "main", "index": 0 }]]
+    },
+    "Validar segredo": {
+      "main": [
+        [
+          { "node": "Responder aceito", "type": "main", "index": 0 },
+          { "node": "Preparar envio", "type": "main", "index": 0 }
+        ],
+        [{ "node": "Responder não autorizado", "type": "main", "index": 0 }]
+      ]
+    },
+    "Preparar envio": {
+      "main": [[{ "node": "Evolution API - enviar texto", "type": "main", "index": 0 }]]
+    },
+    "Evolution API - enviar texto": {
+      "main": [[{ "node": "Preparar callback e auditoria", "type": "main", "index": 0 }]]
+    },
+    "Preparar callback e auditoria": {
+      "main": [[{ "node": "Callback CupomForm", "type": "main", "index": 0 }]]
+    },
+    "Callback CupomForm": {
+      "main": [[{ "node": "Google Sheets - auditoria", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3e1af41e-f7b8-410c-9dce-a75d25a8f001",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

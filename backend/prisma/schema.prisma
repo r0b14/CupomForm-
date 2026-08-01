@@ -1,0 +1,108 @@
+// CupomForm backend schema.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum QuestionType {
+  SINGLE_CHOICE
+  TEXT
+}
+
+enum CouponStatus {
+  AVAILABLE
+  ASSIGNED
+}
+
+enum DeliveryStatus {
+  PENDING
+  DISPATCHED
+  SENT
+  FAILED
+}
+
+model Campaign {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  subtitle    String?
+  privacyText String
+  active      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  questions   Question[]
+  coupons     Coupon[]
+  submissions Submission[]
+  auditLogs   AdminAuditLog[]
+}
+
+model Question {
+  id         String       @id @default(cuid())
+  campaignId String
+  key        String
+  label      String
+  type       QuestionType
+  required   Boolean      @default(true)
+  options    Json?
+  position   Int
+  campaign   Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, key])
+  @@unique([campaignId, position])
+}
+
+model Coupon {
+  id         String       @id @default(cuid())
+  campaignId String
+  code       String       @unique
+  status     CouponStatus @default(AVAILABLE)
+  createdAt  DateTime     @default(now())
+  assignedAt DateTime?
+  campaign   Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  submission Submission?
+
+  @@index([campaignId, status])
+}
+
+model Submission {
+  id          String            @id @default(cuid())
+  campaignId  String
+  name        String
+  phone       String
+  answers     Json
+  consentAt   DateTime
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  couponId    String            @unique
+  campaign    Campaign          @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  coupon      Coupon            @relation(fields: [couponId], references: [id], onDelete: Restrict)
+  delivery    DeliveryRequest?
+
+  @@unique([campaignId, phone])
+}
+
+model DeliveryRequest {
+  id                String         @id @default(cuid())
+  submissionId      String         @unique
+  status            DeliveryStatus @default(PENDING)
+  providerMessageId String?
+  lastError         String?
+  requestedAt       DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  submission        Submission     @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+}
+
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  campaignId String
+  action     String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, createdAt])
+}
