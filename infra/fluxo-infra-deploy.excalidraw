@@ -1,0 +1,509 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "mcp-excalidraw-server",
+  "elements": [
+    {
+      "id": "platform",
+      "type": "rectangle",
+      "x": 40,
+      "y": 150,
+      "width": 210,
+      "height": 90,
+      "backgroundColor": "#d0ebff",
+      "strokeColor": "#1971c2",
+      "label": {
+        "text": "1. Preparar Coolify, DNS e HTTPS"
+      },
+      "createdAt": "2026-08-01T13:26:54.749Z",
+      "updatedAt": "2026-08-01T13:26:54.749Z",
+      "version": 1
+    },
+    {
+      "id": "secrets",
+      "type": "rectangle",
+      "x": 310,
+      "y": 150,
+      "width": 210,
+      "height": 90,
+      "backgroundColor": "#fff3bf",
+      "strokeColor": "#e67700",
+      "label": {
+        "text": "2. Configurar variaveis e segredos"
+      },
+      "createdAt": "2026-08-01T13:26:54.750Z",
+      "updatedAt": "2026-08-01T13:26:54.750Z",
+      "version": 1
+    },
+    {
+      "id": "database",
+      "type": "rectangle",
+      "x": 580,
+      "y": 25,
+      "width": 210,
+      "height": 90,
+      "backgroundColor": "#d3f9d8",
+      "strokeColor": "#2b8a3e",
+      "label": {
+        "text": "3. Criar PostgreSQL persistente"
+      },
+      "createdAt": "2026-08-01T13:26:54.750Z",
+      "updatedAt": "2026-08-01T13:26:54.750Z",
+      "version": 1
+    },
+    {
+      "id": "api",
+      "type": "rectangle",
+      "x": 580,
+      "y": 155,
+      "width": 210,
+      "height": 90,
+      "backgroundColor": "#d0ebff",
+      "strokeColor": "#1971c2",
+      "label": {
+        "text": "4. Publicar API NestJS"
+      },
+      "createdAt": "2026-08-01T13:26:54.750Z",
+      "updatedAt": "2026-08-01T13:26:54.750Z",
+      "version": 1
+    },
+    {
+      "id": "migrations",
+      "type": "rectangle",
+      "x": 850,
+      "y": 25,
+      "width": 210,
+      "height": 90,
+      "backgroundColor": "#d3f9d8",
+      "strokeColor": "#2b8a3e",
+      "label": {
+        "text": "5. Executar migracoes e seed inicial"
+      },
+      "createdAt": "2026-08-01T13:26:54.750Z",
+      "updatedAt": "2026-08-01T13:26:54.750Z",
+      "version": 1
+    },
+    {
+      "id": "web",
+      "type": "rectangle",
+      "x": 850,
+      "y": 155,
+      "width": 210,
+      "height": 90,
+      "backgroundColor": "#d0ebff",
+      "strokeColor": "#1971c2",
+      "label": {
+        "text": "6. Publicar Web Next.js e definir API publica"
+      },
+      "createdAt": "2026-08-01T13:26:54.751Z",
+      "updatedAt": "2026-08-01T13:26:54.751Z",
+      "version": 1
+    },
+    {
+      "id": "n8n",
+      "type": "rectangle",
+      "x": 850,
+      "y": 285,
+      "width": 210,
+      "height": 90,
+      "backgroundColor": "#e5dbff",
+      "strokeColor": "#7048e8",
+      "label": {
+        "text": "7. Publicar n8n com volume persistente"
+      },
+      "createdAt": "2026-08-01T13:26:54.751Z",
+      "updatedAt": "2026-08-01T13:26:54.751Z",
+      "version": 1
+    },
+    {
+      "id": "integrations",
+      "type": "rectangle",
+      "x": 1120,
+      "y": 285,
+      "width": 210,
+      "height": 90,
+      "backgroundColor": "#e5dbff",
+      "strokeColor": "#7048e8",
+      "label": {
+        "text": "8. Configurar webhook, Evolution e Google Sheets"
+      },
+      "createdAt": "2026-08-01T13:26:54.751Z",
+      "updatedAt": "2026-08-01T13:26:54.751Z",
+      "version": 1
+    },
+    {
+      "id": "test",
+      "type": "rectangle",
+      "x": 1120,
+      "y": 155,
+      "width": 210,
+      "height": 90,
+      "backgroundColor": "#ffe3e3",
+      "strokeColor": "#c92a2a",
+      "label": {
+        "text": "9. Teste ponta a ponta: formulario, cupom e WhatsApp"
+      },
+      "createdAt": "2026-08-01T13:26:54.751Z",
+      "updatedAt": "2026-08-01T13:26:54.751Z",
+      "version": 1
+    },
+    {
+      "id": "production",
+      "type": "rectangle",
+      "x": 1390,
+      "y": 155,
+      "width": 210,
+      "height": 90,
+      "backgroundColor": "#d3f9d8",
+      "strokeColor": "#2b8a3e",
+      "label": {
+        "text": "10. Monitorar, fazer backup e divulgar"
+      },
+      "createdAt": "2026-08-01T13:26:54.751Z",
+      "updatedAt": "2026-08-01T13:26:54.751Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dnuc6fn1xpo4q",
+      "type": "arrow",
+      "x": 258,
+      "y": 195,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          44,
+          0
+        ]
+      ],
+      "start": {
+        "id": "platform"
+      },
+      "end": {
+        "id": "secrets"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.752Z",
+      "updatedAt": "2026-08-01T13:26:54.752Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dnf94oyxlfln",
+      "type": "arrow",
+      "x": 519.4597352569588,
+      "y": 146.6390114551117,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          61.08052948608247,
+          -28.2780229102234
+        ]
+      ],
+      "start": {
+        "id": "secrets"
+      },
+      "end": {
+        "id": "database"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.752Z",
+      "updatedAt": "2026-08-01T13:26:54.752Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dneafz5fg8lv",
+      "type": "arrow",
+      "x": 527.998628610601,
+      "y": 197.0925671964926,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          44.00274277879794,
+          0.8148656070147808
+        ]
+      ],
+      "start": {
+        "id": "secrets"
+      },
+      "end": {
+        "id": "api"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.752Z",
+      "updatedAt": "2026-08-01T13:26:54.752Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dni1jik7y3b3",
+      "type": "arrow",
+      "x": 527.9996570865212,
+      "y": 196.0462931211715,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          314.0006858269576,
+          2.9074137576570536
+        ]
+      ],
+      "start": {
+        "id": "secrets"
+      },
+      "end": {
+        "id": "web"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.752Z",
+      "updatedAt": "2026-08-01T13:26:54.752Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dnhz6lq5u6hm4",
+      "type": "arrow",
+      "x": 527.7611400011626,
+      "y": 223.19028500029066,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          314.47771999767474,
+          78.61942999941868
+        ]
+      ],
+      "start": {
+        "id": "secrets"
+      },
+      "end": {
+        "id": "n8n"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.752Z",
+      "updatedAt": "2026-08-01T13:26:54.752Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dn28d2989cr4n",
+      "type": "arrow",
+      "x": 798,
+      "y": 70,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          44,
+          1.4210854715202004e-14
+        ]
+      ],
+      "start": {
+        "id": "database"
+      },
+      "end": {
+        "id": "migrations"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.752Z",
+      "updatedAt": "2026-08-01T13:26:54.752Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dnqq2vgkm90m",
+      "type": "arrow",
+      "x": 785.6695518196112,
+      "y": 151.5294750498168,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          68.66089636077754,
+          -33.05895009963359
+        ]
+      ],
+      "start": {
+        "id": "api"
+      },
+      "end": {
+        "id": "migrations"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.752Z",
+      "updatedAt": "2026-08-01T13:26:54.752Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dnrlb3u7t0kv",
+      "type": "arrow",
+      "x": 1055.6695518196113,
+      "y": 118.4705249501832,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          68.66089636077731,
+          33.05895009963359
+        ]
+      ],
+      "start": {
+        "id": "migrations"
+      },
+      "end": {
+        "id": "test"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.752Z",
+      "updatedAt": "2026-08-01T13:26:54.752Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dnkh7ol8h07l",
+      "type": "arrow",
+      "x": 798,
+      "y": 200,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          314,
+          0
+        ]
+      ],
+      "start": {
+        "id": "api"
+      },
+      "end": {
+        "id": "test"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.752Z",
+      "updatedAt": "2026-08-01T13:26:54.752Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dnp84xtw09e09",
+      "type": "arrow",
+      "x": 1068,
+      "y": 200,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          44,
+          0
+        ]
+      ],
+      "start": {
+        "id": "web"
+      },
+      "end": {
+        "id": "test"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.752Z",
+      "updatedAt": "2026-08-01T13:26:54.752Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dn4ph4j36a8es",
+      "type": "arrow",
+      "x": 1068,
+      "y": 330,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          44,
+          0
+        ]
+      ],
+      "start": {
+        "id": "n8n"
+      },
+      "end": {
+        "id": "integrations"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.753Z",
+      "updatedAt": "2026-08-01T13:26:54.753Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dn12ka33ds9np",
+      "type": "arrow",
+      "x": 1225,
+      "y": 277,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          -24
+        ]
+      ],
+      "start": {
+        "id": "integrations"
+      },
+      "end": {
+        "id": "test"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.753Z",
+      "updatedAt": "2026-08-01T13:26:54.753Z",
+      "version": 1
+    },
+    {
+      "id": "msaeo2dnp40zcwejpi",
+      "type": "arrow",
+      "x": 1338,
+      "y": 200,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          44,
+          0
+        ]
+      ],
+      "start": {
+        "id": "test"
+      },
+      "end": {
+        "id": "production"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-08-01T13:26:54.753Z",
+      "updatedAt": "2026-08-01T13:26:54.753Z",
+      "version": 1
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  }
+}
