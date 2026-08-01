@@ -1,0 +1,2 @@
+# Please do not edit this backend migration lock file manually
+provider = "postgresql"
