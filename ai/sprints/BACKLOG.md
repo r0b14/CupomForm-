@@ -19,8 +19,8 @@
 ## P2 — fora do MVP
 
 - [ ] Múltiplas campanhas e QR com slug.
-- [ ] Painel administrativo.
-- [ ] Definir contrato seguro do painel administrativo: autenticação, perfis, métricas, campanhas, cupons, respostas, entregas e auditoria.
-- [ ] Implementar backend administrativo com Codex antes de conectar o frontend desenhado no Claude Design/Gemini.
+- [ ] Painel administrativo conectado à API publicada com autenticação de servidor.
+- [x] Definir contrato seguro do painel administrativo: token Bearer, métricas, campanhas, cupons, respostas, entregas e auditoria.
+- [x] Implementar backend administrativo antes de conectar o frontend aos dados reais.
 - [ ] Verificação de propriedade do telefone por OTP.
 - [ ] Dashboard de respostas e exportação.
