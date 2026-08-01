@@ -1,0 +1,51 @@
+# Dependencies and package-manager caches
+node_modules/
+.pnp/
+.pnp.js
+.npm/
+
+# Application build output and tooling caches
+.next/
+out/
+dist/
+coverage/
+.turbo/
+.cache/
+*.tsbuildinfo
+*.tsbuildinfo.*
+
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local databases and Prisma development artifacts
+backend/prisma/dev.db
+backend/prisma/dev.db-journal
+*.db-journal
+
+# Docker/local service volumes
+postgres_data/
+n8n_data/
+n8n/.n8n/
+
+# AI harness local overrides and generated handoffs
+ai/models.local.json
+ai/handoffs/
+ai/runs/
+
+# Logs and diagnostic output
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

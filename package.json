@@ -1,0 +1,19 @@
+{
+  "name": "cupomform",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": ["frontend", "backend"],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:generate": "npm run prisma:generate -w @cupomform/backend",
+    "db:migrate": "npm run prisma:migrate -w @cupomform/backend",
+    "db:seed": "npm run prisma:seed -w @cupomform/backend",
+    "db:import-coupons": "npm run coupons:import -w @cupomform/backend"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  },
+  "engines": { "node": ">=22" }
+}
