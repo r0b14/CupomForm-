@@ -32,12 +32,76 @@ const previewCampaign: Campaign = {
   privacyText:
     "Li e aceito que minhas respostas sejam usadas na pesquisa do projeto Gente Daqui e autorizo o uso dos meus dados para receber o cupom.",
   questions: [
-    { key: "atividade", label: "Qual é a sua profissão ou principal atividade?", type: "SINGLE_CHOICE", required: true, options: ["Estudante", "Funcionário(a) CLT", "Autônomo(a)/Freelancer", "Empreendedor(a) informal", "Outro"] },
-    { key: "renda", label: "Como é a sua renda hoje?", type: "SINGLE_CHOICE", required: true, options: ["Bicos ou trabalho por aplicativo", "Trabalho informal fixo", "Autônomo(a) ou MEI", "Emprego com carteira (CLT)", "Não estou trabalhando no momento"] },
-    { key: "barreira", label: "Qual a maior barreira para você avançar hoje?", type: "SINGLE_CHOICE", required: true, options: ["Falta de renda para parar e estudar", "Falta de tempo", "Falta de rede de contatos", "Falta de confiança/segurança", "Documentação ou burocracia"] },
-    { key: "bairro", label: "Em qual bairro ou território você mora?", type: "TEXT", required: true, options: null },
-    { key: "lideranca", label: "Você conhece ou confia em alguma liderança comunitária do seu bairro?", type: "SINGLE_CHOICE", required: true, options: ["Sim, conheço e confio", "Conheço, mas não confio muito", "Não conheço nenhuma"] },
-    { key: "mentoria", label: "Você teria interesse em mentoria para crescer em uma área que gosta?", type: "SINGLE_CHOICE", required: true, options: ["Sim, tenho muito interesse", "Talvez, quero saber mais", "Agora não tenho interesse"] },
+    {
+      key: "atividade",
+      label: "Qual é a sua profissão ou principal atividade?",
+      type: "SINGLE_CHOICE",
+      required: true,
+      options: [
+        "Estudante",
+        "Funcionário(a) CLT",
+        "Autônomo(a)/Freelancer",
+        "Empreendedor(a) informal",
+        "Outro",
+      ],
+    },
+    {
+      key: "renda",
+      label: "Como é a sua renda hoje?",
+      type: "SINGLE_CHOICE",
+      required: true,
+      options: [
+        "Bicos ou trabalho por aplicativo",
+        "Trabalho informal fixo",
+        "Autônomo(a) ou MEI",
+        "Emprego com carteira (CLT)",
+        "Não estou trabalhando no momento",
+      ],
+    },
+    {
+      key: "barreira",
+      label: "Qual a maior barreira para você avançar hoje?",
+      type: "SINGLE_CHOICE",
+      required: true,
+      options: [
+        "Falta de renda para parar e estudar",
+        "Falta de tempo",
+        "Falta de rede de contatos",
+        "Falta de confiança/segurança",
+        "Documentação ou burocracia",
+      ],
+    },
+    {
+      key: "bairro",
+      label: "Em qual bairro ou território você mora?",
+      type: "TEXT",
+      required: true,
+      options: null,
+    },
+    {
+      key: "lideranca",
+      label:
+        "Você conhece ou confia em alguma liderança comunitária do seu bairro?",
+      type: "SINGLE_CHOICE",
+      required: true,
+      options: [
+        "Sim, conheço e confio",
+        "Conheço, mas não confio muito",
+        "Não conheço nenhuma",
+      ],
+    },
+    {
+      key: "mentoria",
+      label:
+        "Você teria interesse em mentoria para crescer em uma área que gosta?",
+      type: "SINGLE_CHOICE",
+      required: true,
+      options: [
+        "Sim, tenho muito interesse",
+        "Talvez, quero saber mais",
+        "Agora não tenho interesse",
+      ],
+    },
   ],
 };
 
@@ -174,7 +238,8 @@ export default function Home() {
     !isIdentityStep && !isConsentStep ? (questionPages[step - 2] ?? []) : [];
 
   useEffect(() => {
-    const isPreview = new URLSearchParams(window.location.search).get("preview") === "1";
+    const isPreview =
+      new URLSearchParams(window.location.search).get("preview") === "1";
     if (isPreview) {
       setPreviewMode(true);
       setCampaign(previewCampaign);
@@ -242,7 +307,11 @@ export default function Home() {
     }
     if (!validateCurrentStep()) return;
     if (previewMode) {
-      setResult({ submissionId: "preview-local", couponCode: "GENTE10", isExisting: false });
+      setResult({
+        submissionId: "preview-local",
+        couponCode: "GENTE10",
+        isExisting: false,
+      });
       setScreen("coupon");
       return;
     }
@@ -414,8 +483,14 @@ export default function Home() {
         <form onSubmit={submit} className="flex min-h-[660px] flex-col">
           <header className="border-b border-[#efeef7] bg-[linear-gradient(180deg,#f5f4fb_0%,#fff_100%)] px-6 pb-[18px] pt-7">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex rounded-full bg-[#eceafc] px-3 py-1.5 text-xs font-extrabold tracking-[.02em] text-[#4338ca]">Pesquisa Gente Daqui</span>
-              {previewMode && <span className="rounded-full bg-amber-100 px-2.5 py-1.5 text-[11px] font-extrabold text-amber-800">Demonstração local</span>}
+              <span className="inline-flex rounded-full bg-[#eceafc] px-3 py-1.5 text-xs font-extrabold tracking-[.02em] text-[#4338ca]">
+                Pesquisa Gente Daqui
+              </span>
+              {previewMode && (
+                <span className="rounded-full bg-amber-100 px-2.5 py-1.5 text-[11px] font-extrabold text-amber-800">
+                  Demonstração local
+                </span>
+              )}
             </div>
             <h1 className="mt-3.5 text-[22px] font-extrabold leading-tight text-[#1b1830]">
               {campaign?.title || "Sua trajetória importa"}
