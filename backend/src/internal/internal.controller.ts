@@ -3,11 +3,14 @@ import { Body, Controller, Headers, Param, Patch, UnauthorizedException } from '
 import { DeliveryStatusDto } from '../submission/dto/delivery-status.dto';
 import { SubmissionService } from '../submission/submission.service';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiSecurity, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
+import { secretsMatch } from '../common/secret';
 import { ApiErrorResponseDto, DeliveryStatusResponseDto } from '../docs/swagger.schemas';
 
 @Controller('internal/deliveries')
 @ApiTags('Internal (n8n)')
 @ApiSecurity('internal-secret')
+@SkipThrottle()
 export class InternalController {
   constructor(private readonly submissionService: SubmissionService) {}
 
@@ -22,7 +25,7 @@ export class InternalController {
     @Headers('x-internal-secret') secret: string | undefined,
     @Body() dto: DeliveryStatusDto,
   ) {
-    if (!secret || secret !== process.env.INTERNAL_CALLBACK_SECRET) {
+    if (!secretsMatch(secret, process.env.INTERNAL_CALLBACK_SECRET)) {
       throw new UnauthorizedException('Credencial interna inválida.');
     }
     return this.submissionService.updateDeliveryStatus(id, dto);

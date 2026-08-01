@@ -31,6 +31,22 @@
 - [ ] Testar concorrência, repetição e estoque vazio contra banco real: bloqueado por PostgreSQL indisponível.
 - [ ] Configurar/testar n8n, Evolution API e Google Sheets: bloqueado por serviços, credenciais e webhooks ausentes.
 
+### Hardening de backend e infraestrutura — 01/08/2026
+
+- [x] Rate limit efetivamente aplicado como guard global; limites específicos dos endpoints públicos preservados.
+- [x] Callback interno do n8n usa comparação de segredo resistente a ataques de temporização.
+- [x] `GET /api/health` verifica API e conexão PostgreSQL e pode ser usado pelo health check do Coolify/Docker.
+- [x] Backend reconhece múltiplas origens CORS separadas por vírgula e confia em apenas um proxy reverso.
+- [x] Variáveis críticas são validadas no boot; produção exige URLs e dois segredos distintos com pelo menos 32 caracteres.
+- [x] Seed idempotente atualizado para a campanha Gente Daqui com 12 perguntas do instrumento de pesquisa; outras campanhas ficam inativas.
+- [x] Dockerfile da API expõe a porta 3001, aplica migrações no boot e possui health check.
+- [x] Script local gera três segredos independentes sem gravá-los no repositório.
+- [x] `npm test -w @cupomform/backend`: 18/18 testes aprovados em 5 arquivos.
+- [x] `npm run build -w @cupomform/backend`: aprovado.
+- [x] `npx tsc -p backend/tsconfig.json --noEmit`: aprovado.
+- [x] `prisma generate` e `prisma validate`: aprovados; a validação usou somente uma URL PostgreSQL sintática temporária.
+- [ ] Compose/deploy/E2E real: depende do provisionamento do PostgreSQL, domínios e credenciais no Coolify/n8n.
+
 ### Comandos
 
 ```powershell
@@ -92,6 +108,7 @@
 - [ ] Dados de campanha e lote real conferidos.
 - [ ] Segredos configurados somente no Coolify/n8n.
 - [ ] `npm test` e `npm run build` aprovados.
+- [x] Testes e build do backend aprovados localmente em 01/08/2026.
 - [ ] Formulário testado em celular físico.
 - [ ] Cupom único, repetição e estoque vazio testados.
 - [ ] WhatsApp e linha no Sheets confirmados.

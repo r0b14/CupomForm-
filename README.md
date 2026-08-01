@@ -16,6 +16,8 @@ MVP de formulário de campanha: coleta respostas, reserva um cupom único por Wh
 
 4. Acesse `http://localhost:3000`; n8n fica em `http://localhost:5678`.
 
+A saúde da API e da conexão PostgreSQL pode ser verificada em `http://localhost:3001/api/health`.
+
 A documentação interativa da API fica em `http://localhost:3001/api/docs` (OpenAPI JSON em `/api/docs-json`). Defina `SWAGGER_ENABLED=false` para ocultá-la em um ambiente público.
 
 Para navegar pelo formulário completo sem iniciar API, PostgreSQL ou n8n, abra `http://localhost:3000/?preview=1`. Esse modo é explicitamente local: usa dados demonstrativos, entrega o código `GENTE10` e não persiste nem envia WhatsApp.
