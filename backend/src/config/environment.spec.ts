@@ -14,6 +14,7 @@ describe('validateEnvironment', () => {
         NODE_ENV: 'production',
         DATABASE_URL: 'postgresql://user:pass@postgres:5432/db',
         FRONTEND_URL: 'https://cupom.example.com',
+        ADMIN_API_TOKEN: 'b'.repeat(32),
       }),
     ).toThrow('N8N_DELIVERY_WEBHOOK_URL');
   });
@@ -28,6 +29,7 @@ describe('validateEnvironment', () => {
         N8N_DELIVERY_WEBHOOK_URL: 'https://n8n.example.com/webhook/cupom-delivery',
         N8N_SHARED_SECRET: repeatedSecret,
         INTERNAL_CALLBACK_SECRET: repeatedSecret,
+        ADMIN_API_TOKEN: 'b'.repeat(32),
       }),
     ).toThrow('devem ser diferentes');
   });

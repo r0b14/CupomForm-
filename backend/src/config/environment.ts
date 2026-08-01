@@ -35,6 +35,7 @@ export function validateEnvironment(config: Environment): Environment {
   frontendUrls.forEach((value) => validHttpUrl(value, 'FRONTEND_URL'));
 
   if (config.NODE_ENV === 'production') {
+    const adminToken = required(config, 'ADMIN_API_TOKEN');
     validHttpUrl(required(config, 'N8N_DELIVERY_WEBHOOK_URL'), 'N8N_DELIVERY_WEBHOOK_URL');
     const webhookSecret = required(config, 'N8N_SHARED_SECRET');
     const callbackSecret = required(config, 'INTERNAL_CALLBACK_SECRET');
@@ -44,6 +45,7 @@ export function validateEnvironment(config: Environment): Environment {
     if (webhookSecret === callbackSecret) {
       throw new Error('N8N_SHARED_SECRET e INTERNAL_CALLBACK_SECRET devem ser diferentes.');
     }
+    if (adminToken.length < 32) throw new Error('ADMIN_API_TOKEN deve ter pelo menos 32 caracteres.');
   }
 
   return { ...config, PORT: port, FRONTEND_URL: frontendUrls.join(',') };
