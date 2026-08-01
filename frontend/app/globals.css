@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap');
+@config "../tailwind.config.ts";
+@import "tailwindcss";
+
+:root { color-scheme: light; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #0b0a1f;
+  color: #1b1830;
+  font-family: 'Manrope', Arial, Helvetica, sans-serif;
+}
+
+input, textarea, button { font: inherit; }
