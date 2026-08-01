@@ -50,3 +50,9 @@ Thumbs.db
 .idea/
 .vscode/
 capturas-telas
+.ssh/
+*.pem
+*.ppk
+*.key
+id_rsa
+id_ed25519
