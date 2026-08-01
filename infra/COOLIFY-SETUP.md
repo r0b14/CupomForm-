@@ -9,9 +9,9 @@ Crie ou configure estes recursos:
 | Recurso | Origem/porta | Domínio público sugerido |
 | --- | --- | --- |
 | PostgreSQL | Banco gerenciado pelo Coolify | nenhum |
-| API NestJS | `backend/Dockerfile`, porta `3001` | `api.seu-dominio.com` |
-| Frontend Next.js | `frontend/Dockerfile`, porta `3000` | `cupom.seu-dominio.com` |
-| n8n | sua nova workspace n8n | `n8n.seu-dominio.com` |
+| API NestJS | `backend/Dockerfile`, porta `3001` | `api-cupom.r0b14.com` |
+| Frontend Next.js | `frontend/Dockerfile`, porta `3000` | `cupom.r0b14.com` |
+| n8n | workspace existente | `n8n.r0b14.com` |
 
 No recurso de PostgreSQL, gere ou copie a URL interna de conexão. Ela deve ser usada apenas como `DATABASE_URL` da API. Não exponha a porta do banco à internet.
 
@@ -40,10 +40,12 @@ SWAGGER_ENABLED=true
 ### Frontend (build environment)
 
 ```dotenv
-NEXT_PUBLIC_API_URL=https://api.seu-dominio.com/api
+NEXT_PUBLIC_API_URL=https://api-cupom.r0b14.com/api
+HOSTNAME=0.0.0.0
+PORT=3000
 ```
 
-`NEXT_PUBLIC_API_URL` é incorporada durante o build do Next.js. Faça um novo deploy do frontend sempre que alterá-la.
+`NEXT_PUBLIC_API_URL` deve estar disponível no build e no runtime. `HOSTNAME` e `PORT` são somente de runtime; o primeiro impede o Next standalone de escutar apenas no hostname dinâmico do container.
 
 ### n8n
 
@@ -61,8 +63,8 @@ N8N_ENCRYPTION_KEY=<chave longa e persistente>
 ## 3. Ordem segura de publicação
 
 1. Publique PostgreSQL e API; execute a migração Prisma pelo processo de deploy configurado no `backend/Dockerfile`.
-2. Configure o health check da API como `GET /api/health` e confira `https://api.seu-dominio.com/api/docs`.
-3. Publique o frontend e abra `https://cupom.seu-dominio.com`.
+2. Configure o health check da API como `GET http://127.0.0.1:3001/api/health` e confira `https://api-cupom.r0b14.com/api/docs`.
+3. Publique o frontend, configure o health check como `GET http://127.0.0.1:3000/` e abra `https://cupom.r0b14.com`.
 4. Configure Evolution e Google Sheets no n8n, importe e ative o workflow.
 5. Só então habilite a campanha e faça um envio com um número de teste autorizado.
 
@@ -89,6 +91,15 @@ Estas ações não devem ser delegadas nem registradas no Git, pois envolvem con
 5. Informar no Coolify os Dockerfiles e portas da tabela da seção 1.
 6. Importar o JSON do workflow na workspace n8n e selecionar a credencial Google Sheets.
 7. Informar diretamente no n8n a URL, instância e chave da Evolution API.
-8. Rodar o seed uma única vez pelo terminal da API: `npm run prisma:seed -w @cupomform/backend`.
+8. Rodar o seed uma única vez dentro do container da API: `npm run prisma:seed -w @cupomform/backend`. Se o terminal do Coolify não funcionar, conecte por SSH, localize a API com `sudo docker ps` e execute com `sudo docker exec`.
 9. Importar o lote real de cupons; os códigos `GENTE-DEV-*` do seed servem apenas para teste/homologação.
 10. Fazer um envio para seu próprio número e conferir API, n8n, WhatsApp, PostgreSQL e Sheets antes de divulgar o QR Code.
+
+## 6. Estado atual em 01/08/2026
+
+- PostgreSQL 16: publicado e saudável.
+- API: `https://api-cupom.r0b14.com`, publicada e saudável.
+- Campanha `gente-daqui`: seed aplicado com 12 perguntas e três cupons de homologação.
+- Frontend: `https://cupom.r0b14.com`, publicado e saudável.
+- n8n: `https://n8n.r0b14.com`, existente; workflow CupomForm ainda precisa ser importado/configurado.
+- Evolution API e Google Sheets: integração E2E ainda pendente.

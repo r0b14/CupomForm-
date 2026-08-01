@@ -1,6 +1,6 @@
 # Sprint 01 — campanha MVP e lançamento
 
-**Status:** em andamento — frontend implementado localmente; integrações reais e aceite final pendentes.  
+**Status:** em andamento — PostgreSQL, API e frontend publicados; n8n/Evolution/Sheets e aceite E2E pendentes.
 **Objetivo:** disponibilizar uma campanha real por QR Code com emissão única de cupom e envio opcional por WhatsApp.
 
 ## Escopo e aceite
@@ -27,7 +27,7 @@
 - [x] `npm test` passou: 2/2 testes.
 - [x] `npm run build` passou: frontend Next.js e backend NestJS.
 - [x] Contratos públicos revisados e preservados.
-- [ ] Aplicar migração/seed/importar lote real: bloqueado por ausência de `DATABASE_URL` e PostgreSQL local.
+- [x] Aplicar migração e seed no PostgreSQL de produção: concluído no Coolify; lote real ainda pendente.
 - [ ] Testar concorrência, repetição e estoque vazio contra banco real: bloqueado por PostgreSQL indisponível.
 - [ ] Configurar/testar n8n, Evolution API e Google Sheets: bloqueado por serviços, credenciais e webhooks ausentes.
 
@@ -45,7 +45,24 @@
 - [x] `npm run build -w @cupomform/backend`: aprovado.
 - [x] `npx tsc -p backend/tsconfig.json --noEmit`: aprovado.
 - [x] `prisma generate` e `prisma validate`: aprovados; a validação usou somente uma URL PostgreSQL sintática temporária.
-- [ ] Compose/deploy/E2E real: depende do provisionamento do PostgreSQL, domínios e credenciais no Coolify/n8n.
+- [x] PostgreSQL 16, API e frontend provisionados no Coolify com health checks aprovados.
+- [ ] E2E de entrega real: depende da configuração do n8n, Evolution API e Google Sheets.
+
+### Evidências de produção — 01/08/2026
+
+- [x] PostgreSQL 16 Alpine persistente no Coolify, acessível somente pela rede interna.
+- [x] API publicada em `https://api-cupom.r0b14.com`, porta 3001, health check `GET /api/health` aprovado.
+- [x] Migração Prisma aplicada automaticamente pelo container sem pendências.
+- [x] Seed executado via SSH dentro do container; campanha `gente-daqui`, 12 perguntas e cupons `GENTE-DEV-*` criados.
+- [x] `GET /api/campaign` validado dentro do container e retornando a campanha completa.
+- [x] Frontend publicado em `https://cupom.r0b14.com`, porta 3000, health check `/` aprovado.
+- [x] DNS `api-cupom.r0b14.com` e `cupom.r0b14.com` apontado para o servidor Coolify.
+- [x] Segredos reais mantidos apenas no Coolify; `.env.example` permanece sem credenciais.
+- [x] Kit SSH protegido pelo `.gitignore` e permissões locais restritas.
+- [x] Incidentes de deploy resolvidos: artefato Nest em `dist/main.js`; probes em `127.0.0.1`; Next standalone com `HOSTNAME=0.0.0.0`.
+- [ ] Workflow n8n importado e ativado.
+- [ ] Evolution API, callback da API e Google Sheets validados de ponta a ponta.
+- [ ] Cupons reais importados; o estoque atual é somente de homologação.
 
 ### Comandos
 
@@ -74,7 +91,7 @@
 
 - Variável pública permitida: somente `NEXT_PUBLIC_API_URL`.
 - Gemini pode alterar apenas `frontend/` e não pode criar persistência local/fingir entrega WhatsApp.
-- Pendente: dados reais de campanha, banco, n8n/Evolution/Sheets e teste E2E em ambiente público.
+- Pendente: lote real de cupons, n8n/Evolution/Sheets e teste E2E em ambiente público.
 - Evidências: `npm run db:generate`, `prisma validate`, `npm test`, `npm run build` e `git diff --check` passaram.
 
 ## Etapa Gemini — design e frontend
@@ -93,6 +110,7 @@
 - [x] Contratos preservados: `GET /api/campaign`, `POST /api/submissions` e `POST /api/submissions/:id/delivery`.
 - [x] `npm run build -w @cupomform/frontend` passou.
 - [x] Frontend respondeu HTTP 200 em `http://localhost:3000`.
+- [x] Frontend publicado e saudável em `https://cupom.r0b14.com`.
 - [ ] Revisão visual/QA no Gemini 3.5 após configuração da campanha e API reais.
 
 ### Comandos
@@ -107,10 +125,10 @@
 
 - [ ] Dados de campanha e lote real conferidos.
 - [ ] Segredos configurados somente no Coolify/n8n.
-- [ ] `npm test` e `npm run build` aprovados.
+- [x] `npm test` e builds de backend/frontend aprovados.
 - [x] Testes e build do backend aprovados localmente em 01/08/2026.
 - [ ] Formulário testado em celular físico.
 - [ ] Cupom único, repetição e estoque vazio testados.
 - [ ] WhatsApp e linha no Sheets confirmados.
 - [ ] URL HTTPS testada pelo QR Code.
-- [ ] Handoff e evidências preenchidos neste arquivo.
+- [x] Handoff e evidências preenchidos neste arquivo.

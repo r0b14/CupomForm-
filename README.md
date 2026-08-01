@@ -12,7 +12,7 @@ MVP de formulário de campanha: coleta respostas, reserva um cupom único por Wh
    docker compose exec api npm run prisma:seed -w @cupomform/backend
    ```
 
-   A migração é aplicada automaticamente na inicialização da API. O seed cria uma campanha provisória e três cupons de demonstração.
+   A migração é aplicada automaticamente na inicialização da API. O seed cria a campanha `gente-daqui`, suas 12 perguntas e três cupons `GENTE-DEV-*` de homologação.
 
 4. Acesse `http://localhost:3000`; n8n fica em `http://localhost:5678`.
 
@@ -36,9 +36,18 @@ $env:COUPON_CSV_PATH='C:\caminho\cupons.csv'; npm run db:import-coupons
 
 ## Deploy no Coolify
 
+Estado de homologação em 01/08/2026:
+
+- Frontend: `https://cupom.r0b14.com`.
+- API: `https://api-cupom.r0b14.com`.
+- Health: `https://api-cupom.r0b14.com/api/health`.
+- Swagger: `https://api-cupom.r0b14.com/api/docs`.
+- PostgreSQL 16, API e frontend estão publicados e saudáveis; n8n/Evolution/Sheets permanecem pendentes.
+
 - Crie PostgreSQL persistente no Coolify e configure `DATABASE_URL` na API.
 - Crie dois serviços a partir deste repositório: API usando `backend/Dockerfile` e Web usando `frontend/Dockerfile`; defina seus domínios HTTPS.
 - Defina `FRONTEND_URL` na API e construa a Web com `NEXT_PUBLIC_API_URL=https://api.seudominio.com/api`.
+- No Next standalone, configure `HOSTNAME=0.0.0.0` e `PORT=3000` em runtime. Use `127.0.0.1`, não `localhost`, nos health checks internos.
 - Hospede n8n como serviço separado, com volume persistente, `N8N_ENCRYPTION_KEY` e `WEBHOOK_URL` públicos. Configure `N8N_DELIVERY_WEBHOOK_URL` na API com a URL do webhook n8n.
 - Use segredos longos e distintos para `N8N_SHARED_SECRET` e `INTERNAL_CALLBACK_SECRET`.
 - Importe o fluxo descrito em [n8n/README.md](n8n/README.md), conecte Evolution API e Google Sheets e faça um envio de teste antes de divulgar o QR.
