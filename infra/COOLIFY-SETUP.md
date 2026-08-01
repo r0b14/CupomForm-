@@ -33,19 +33,24 @@ FRONTEND_URL=https://cupom.seu-dominio.com
 N8N_DELIVERY_WEBHOOK_URL=https://n8n.seu-dominio.com/webhook/cupom-delivery
 N8N_SHARED_SECRET=<segredo 1>
 INTERNAL_CALLBACK_SECRET=<segredo 2>
+ADMIN_API_TOKEN=<segredo administrativo longo e exclusivo>
 PORT=3001
 SWAGGER_ENABLED=true
 ```
 
-### Frontend (build environment)
+### Frontend
 
 ```dotenv
 NEXT_PUBLIC_API_URL=https://api-cupom.r0b14.com/api
 HOSTNAME=0.0.0.0
 PORT=3000
+ADMIN_API_URL=https://api-cupom.r0b14.com/api/admin
+ADMIN_API_TOKEN=<mesmo token administrativo configurado na API>
+ADMIN_PANEL_PASSWORD=<senha forte e exclusiva do operador>
+ADMIN_SESSION_SECRET=<segredo de sessão longo e exclusivo>
 ```
 
-`NEXT_PUBLIC_API_URL` deve estar disponível no build e no runtime. `HOSTNAME` e `PORT` são somente de runtime; o primeiro impede o Next standalone de escutar apenas no hostname dinâmico do container.
+`NEXT_PUBLIC_API_URL` deve estar disponível no build e no runtime. As quatro variáveis administrativas, `HOSTNAME` e `PORT` são somente de runtime. Nunca use o prefixo `NEXT_PUBLIC_` em token, senha ou segredo de sessão.
 
 ### n8n
 
@@ -65,8 +70,9 @@ N8N_ENCRYPTION_KEY=<chave longa e persistente>
 1. Publique PostgreSQL e API; execute a migração Prisma pelo processo de deploy configurado no `backend/Dockerfile`.
 2. Configure o health check da API como `GET http://127.0.0.1:3001/api/health` e confira `https://api-cupom.r0b14.com/api/docs`.
 3. Publique o frontend, configure o health check como `GET http://127.0.0.1:3000/` e abra `https://cupom.r0b14.com`.
-4. Configure Evolution e Google Sheets no n8n, importe e ative o workflow.
-5. Só então habilite a campanha e faça um envio com um número de teste autorizado.
+4. Acesse `https://cupom.r0b14.com/admin`, valide senha inválida, login, dados reais e logout.
+5. Configure Evolution e Google Sheets no n8n, importe e ative o workflow.
+6. Só então habilite a campanha e faça um envio com um número de teste autorizado.
 
 ## 4. Conferência final
 
@@ -101,5 +107,6 @@ Estas ações não devem ser delegadas nem registradas no Git, pois envolvem con
 - API: `https://api-cupom.r0b14.com`, publicada e saudável.
 - Campanha `gente-daqui`: seed aplicado com 12 perguntas e três cupons de homologação.
 - Frontend: `https://cupom.r0b14.com`, publicado e saudável.
+- Painel administrativo: `https://cupom.r0b14.com/admin`, integrado à API e validado com autenticação em produção.
 - n8n: `https://n8n.r0b14.com`, existente; workflow CupomForm ainda precisa ser importado/configurado.
 - Evolution API e Google Sheets: integração E2E ainda pendente.

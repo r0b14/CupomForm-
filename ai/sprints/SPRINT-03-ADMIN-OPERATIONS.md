@@ -1,6 +1,6 @@
 # Sprint 03 — painel administrativo e operação segura
 
-**Status:** em andamento — interface e API administrativas implementadas; integração server-side do painel e configuração de produção pendentes.
+**Status:** entregue em produção — painel, BFF, API administrativa e autenticação validados; ações operacionais mutáveis e integração WhatsApp permanecem no aceite E2E.
 
 **Objetivo:** permitir a operação segura da campanha por uma área administrativa, sem alterar os contratos públicos de emissão de cupons.
 
@@ -10,12 +10,13 @@
 2. **Publicação inicial:** PostgreSQL, API e frontend foram publicados; health checks, CORS, rate limit e segredos de integração foram reforçados.
 3. **Operação visual:** referência `CupomForm Admin.dc.html` foi transformada na rota `/admin`, com navegação, métricas, tabelas, filtros, CSV demonstrativo e layout responsivo.
 4. **Estrutura administrativa de backend:** API protegida por Bearer token, auditoria, consultas operacionais, importação de códigos, atualização de campanha e reenvio foram adicionados.
-5. **Fase atual:** a base está pronta para conectar o painel à API, aplicar a migração no Coolify e realizar o aceite operacional com dados reais.
+5. **Integração segura:** o Gemini substituiu os dados demonstrativos por um BFF Next.js com login, cookie assinado e allowlist de rotas; os segredos permanecem somente no servidor.
+6. **Publicação e aceite:** API no commit `89fd40e` e frontend no commit `aa4c0c0` foram publicados no Coolify e ficaram saudáveis. Login e dashboard com dados reais foram validados em produção.
 
 ## Entregas registradas
 
 - [x] Painel administrativo criado em `frontend/app/admin/page.tsx` e acessível em `/admin`.
-- [x] Painel preserva a rota pública `/` e informa claramente que ainda usa dados de demonstração.
+- [x] Painel preserva a rota pública `/` e usa dados reais da API administrativa.
 - [x] Interface inclui painel geral, participantes, respostas, campanha, cupons, envios e histórico.
 - [x] Build do frontend validou a rota `/admin`.
 - [x] API administrativa adicionada sob `/api/admin`.
@@ -29,13 +30,17 @@
 - [x] Auditoria administrativa persistida em `AdminAuditLog`.
 - [x] Migração Prisma criada sem modificar migrações já aplicadas.
 - [x] `prisma generate`, `npm test` e `npm run build` aprovados após a implementação.
+- [x] BFF Next.js protege o token da API e autentica o operador por cookie `HttpOnly`.
+- [x] Variáveis administrativas foram configuradas somente no runtime do frontend no Coolify.
+- [x] API autenticada validada dentro do container com `GET /api/admin/dashboard`.
+- [x] Painel publicado em `https://cupom.r0b14.com/admin` e aceito pelo responsável.
 
 ## Próximas ações de fechamento
 
-- [ ] Configurar `ADMIN_API_TOKEN` no Coolify; não armazenar o valor no Git ou no frontend.
-- [ ] Publicar a API; o `backend/Dockerfile` aplica `prisma migrate deploy` automaticamente antes de iniciar o NestJS.
-- [ ] Conectar `/admin` por um BFF Next.js autenticado por cookie `HttpOnly`; nunca usar `NEXT_PUBLIC_*` para segredos.
-- [ ] Substituir os dados demonstrativos por respostas, cupons e entregas reais depois da integração autenticada.
+- [x] Configurar `ADMIN_API_TOKEN` no Coolify sem armazenar o valor no Git ou no bundle do frontend.
+- [x] Publicar a API; o `backend/Dockerfile` aplica `prisma migrate deploy` automaticamente antes de iniciar o NestJS.
+- [x] Conectar `/admin` por um BFF Next.js autenticado por cookie `HttpOnly`.
+- [x] Substituir os dados demonstrativos por respostas, cupons e entregas reais.
 - [ ] Testar importação de lote, alteração de campanha e reenvio com dados de homologação.
 - [ ] Definir política de rotação/revogação do token e responsáveis pelo acesso administrativo.
 - [ ] Executar aceite E2E: emissão, entrega WhatsApp, callback n8n e visualização no painel.
@@ -60,8 +65,16 @@ Todos os endpoints exigem `Authorization: Bearer <ADMIN_API_TOKEN>`:
 - [x] Nenhuma credencial administrativa é exposta no navegador ou em variáveis públicas.
 - [x] Alterações administrativas relevantes geram evento de auditoria.
 - [x] Compilação e testes do monorepo passam.
-- [ ] Operação autenticada validada no ambiente publicado.
-- [ ] Painel conectado à API sem token público e com estados de erro adequados.
+- [x] Operação autenticada validada no ambiente publicado.
+- [x] Painel conectado à API sem token público e com estados de erro adequados.
+
+## Evidências do aceite em produção
+
+- API: commit `89fd40e`, container saudável em `127.0.0.1:3001/api/health`.
+- Frontend: commit `aa4c0c0`, container saudável em `127.0.0.1:3000/`.
+- Consulta autenticada retornou campanha `gente-daqui`, 1 submissão, 2 cupons disponíveis, 1 atribuído e 1 entrega com falha.
+- Login do painel, carregamento dos dados reais e sessão administrativa foram confirmados pelo responsável.
+- Segredos reais não foram registrados em logs, documentos ou commits.
 
 ## Configuração de infraestrutura
 

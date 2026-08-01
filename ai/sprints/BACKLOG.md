@@ -12,15 +12,15 @@
 ## P1 — confiabilidade depois do lançamento
 
 - [ ] Retentativa/alerta para falhas de envio WhatsApp.
-- [ ] Métricas de estoque, emissão e entrega de cupom.
-- [ ] Página/rotina interna para importação segura de lote de cupons.
+- [x] Métricas de estoque, emissão e entrega de cupom.
+- [x] Página/rotina interna para importação segura de lote de cupons.
 - [ ] Revisar texto LGPD e acessos à planilha com responsável jurídico.
 
 ## P2 — fora do MVP
 
 - [ ] Múltiplas campanhas e QR com slug.
-- [ ] Painel administrativo conectado à API publicada com autenticação de servidor.
+- [x] Painel administrativo conectado à API publicada com autenticação de servidor.
 - [x] Definir contrato seguro do painel administrativo: token Bearer, métricas, campanhas, cupons, respostas, entregas e auditoria.
 - [x] Implementar backend administrativo antes de conectar o frontend aos dados reais.
 - [ ] Verificação de propriedade do telefone por OTP.
-- [ ] Dashboard de respostas e exportação.
+- [x] Dashboard de respostas e exportação.

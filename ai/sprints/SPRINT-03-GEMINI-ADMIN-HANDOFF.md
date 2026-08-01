@@ -1,5 +1,7 @@
 # Handoff Gemini — integração do painel administrativo
 
+**Status:** concluído e publicado no commit `aa4c0c0`; painel validado em produção em 01/08/2026.
+
 Execute este trabalho exclusivamente pela rota `frontend-implement`, obedecendo `frontend/FRONTEND_PROMPT.md`.
 
 ## Objetivo
