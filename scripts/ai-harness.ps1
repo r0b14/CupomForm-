@@ -69,7 +69,7 @@ try {
     & codex @arguments
   } elseif ($route.provider -eq 'gemini') {
     $approvalMode = if ($route.mode -eq 'read-only') { 'plan' } else { 'auto_edit' }
-    $arguments = @('--approval-mode', $approvalMode, '--prompt', $fullPrompt)
+    $arguments = @('--skip-trust', '--approval-mode', $approvalMode, '--prompt', $fullPrompt)
     if ($Model) { $arguments += @('--model', $Model) }
     & gemini @arguments
   } else {
