@@ -13,6 +13,10 @@ export function setupSwagger(app: INestApplication) {
       { type: 'apiKey', in: 'header', name: 'x-internal-secret', description: 'Segredo exclusivo do callback n8n.' },
       'internal-secret',
     )
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'opaque', description: 'Token exclusivo da camada server-side do painel.' },
+      'admin-token',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config, {

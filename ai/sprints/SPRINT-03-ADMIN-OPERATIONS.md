@@ -1,6 +1,6 @@
 # Sprint 03 — painel administrativo e operação segura
 
-**Status:** em andamento — interface e API administrativas implementadas; migração, segredo de produção e integração do painel pendentes.
+**Status:** em andamento — interface e API administrativas implementadas; integração server-side do painel e configuração de produção pendentes.
 
 **Objetivo:** permitir a operação segura da campanha por uma área administrativa, sem alterar os contratos públicos de emissão de cupons.
 
@@ -22,6 +22,9 @@
 - [x] Acesso administrativo protegido por `Authorization: Bearer <ADMIN_API_TOKEN>`.
 - [x] Produção exige `ADMIN_API_TOKEN` com pelo menos 32 caracteres.
 - [x] Dashboard, participantes, campanha, cupons, entregas e histórico administrativo disponíveis na API.
+- [x] Agregação de respostas reais disponível em `GET /api/admin/responses`.
+- [x] Filtros administrativos validados antes de chegar ao Prisma e consultas operacionais limitadas.
+- [x] Alteração da campanha e importação de cupons persistem a auditoria na mesma transação.
 - [x] Atualização de campanha, importação validada de códigos e reenvio de entrega implementados.
 - [x] Auditoria administrativa persistida em `AdminAuditLog`.
 - [x] Migração Prisma criada sem modificar migrações já aplicadas.
@@ -30,8 +33,8 @@
 ## Próximas ações de fechamento
 
 - [ ] Configurar `ADMIN_API_TOKEN` no Coolify; não armazenar o valor no Git ou no frontend.
-- [ ] Aplicar `npm run prisma:deploy -w @cupomform/backend` no ambiente de produção.
-- [ ] Conectar `/admin` aos endpoints `/api/admin` com o token mantido em uma camada segura de servidor; nunca usar `NEXT_PUBLIC_*` para o token.
+- [ ] Publicar a API; o `backend/Dockerfile` aplica `prisma migrate deploy` automaticamente antes de iniciar o NestJS.
+- [ ] Conectar `/admin` por um BFF Next.js autenticado por cookie `HttpOnly`; nunca usar `NEXT_PUBLIC_*` para segredos.
 - [ ] Substituir os dados demonstrativos por respostas, cupons e entregas reais depois da integração autenticada.
 - [ ] Testar importação de lote, alteração de campanha e reenvio com dados de homologação.
 - [ ] Definir política de rotação/revogação do token e responsáveis pelo acesso administrativo.
@@ -43,6 +46,7 @@ Todos os endpoints exigem `Authorization: Bearer <ADMIN_API_TOKEN>`:
 
 - `GET /api/admin/dashboard`
 - `GET /api/admin/participants?query=&status=`
+- `GET /api/admin/responses`
 - `GET/PATCH /api/admin/campaign`
 - `GET /api/admin/coupons?query=&status=`
 - `POST /api/admin/coupons/import` com `{ "codes": ["CODIGO-1"] }`
@@ -58,3 +62,21 @@ Todos os endpoints exigem `Authorization: Bearer <ADMIN_API_TOKEN>`:
 - [x] Compilação e testes do monorepo passam.
 - [ ] Operação autenticada validada no ambiente publicado.
 - [ ] Painel conectado à API sem token público e com estados de erro adequados.
+
+## Configuração de infraestrutura
+
+### API no Coolify
+
+- `ADMIN_API_TOKEN`: segredo aleatório com pelo menos 32 caracteres, disponível somente em runtime.
+- O valor deve ser o mesmo configurado no frontend, mas nunca deve aparecer no bundle ou em uma variável `NEXT_PUBLIC_*`.
+- Faça o deploy da API antes do frontend e confirme `GET /api/health`.
+
+### Frontend no Coolify
+
+- `ADMIN_API_URL=https://api-cupom.r0b14.com/api/admin` — runtime apenas.
+- `ADMIN_API_TOKEN=<mesmo valor da API>` — runtime apenas.
+- `ADMIN_PANEL_PASSWORD=<senha forte e exclusiva>` — runtime apenas.
+- `ADMIN_SESSION_SECRET=<segredo aleatório diferente, mínimo 32 caracteres>` — runtime apenas.
+- Mantenha `NEXT_PUBLIC_API_URL=https://api-cupom.r0b14.com/api` disponível no build e runtime para o formulário público.
+
+O proxy Next.js deve autenticar o operador, criar cookie `HttpOnly`, `Secure` e `SameSite=Strict`, validar uma allowlist de rotas e somente então adicionar o Bearer token ao pedido enviado para a API.
