@@ -1,0 +1,32 @@
+export type Question = {
+  key: string;
+  label: string;
+  type: "SINGLE_CHOICE" | "TEXT";
+  required: boolean;
+  options: string[] | null;
+};
+
+export type Campaign = {
+  slug: string;
+  title: string;
+  subtitle?: string | null;
+  privacyText: string;
+  questions: Question[];
+};
+
+export type Result = {
+  submissionId: string;
+  couponCode: string;
+  isExisting: boolean;
+};
+
+export type FieldErrors = Record<string, string>;
+
+export type ScreenState =
+  | "loading"
+  | "form"
+  | "coupon"
+  | "soldout"
+  | "unavailable";
+
+export type DeliveryState = "idle" | "sending" | "sent";
