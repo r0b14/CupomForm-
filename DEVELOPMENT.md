@@ -35,6 +35,13 @@ Ao finalizar a entrega:
 3. faça redeploy e confirme o SHA do merge;
 4. mantenha `development` em um recurso/domínio separado se houver continuidade do projeto.
 
+## Testes Locais do Frontend
+
+Para testar o formulário público sem depender do backend em execução:
+1. Inicie o ambiente de dev: `npm run dev -w @cupomform/frontend` (ou especificando uma porta: `npm run dev -w @cupomform/frontend -- -p 3005`).
+2. Acesse no navegador: `http://localhost:<porta>/?preview=1`.
+3. O parâmetro `?preview=1` carrega a campanha demonstrativa local, permitindo testar a digitação fluida do WhatsApp com máscara `(XX) XXXXX-XXXX` e a emissão do cupom `GENTE10`.
+
 ## Hotfix
 
 Correção crítica de produção nasce de `main` em `fix/<nome>`, volta para `main` por PR e depois é incorporada em `development`, evitando que a correção desapareça na próxima entrega.
@@ -45,3 +52,4 @@ Correção crítica de produção nasce de `main` em `fix/<nome>`, volta para `m
 - Um ambiente de homologação duradouro deve ter PostgreSQL e credenciais próprios.
 - Enquanto `development` usar a infraestrutura de produção, não teste importação, alteração de campanha ou reenvio com dados descartáveis.
 - Migrações Prisma nunca são reescritas depois de aplicadas; sempre crie uma nova migração.
+
