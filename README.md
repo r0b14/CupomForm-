@@ -22,7 +22,42 @@ A documentação interativa da API fica em `http://localhost:3001/api/docs` (Ope
 
 Para navegar pelo formulário completo sem iniciar API, PostgreSQL ou n8n, abra `http://localhost:3000/?preview=1`. Esse modo é explicitamente local: usa dados demonstrativos, entrega o código `GENTE10` e não persiste nem envia WhatsApp.
 
-Para importar o lote real (CSV com uma coluna `code`, exportado do Google Sheets):
+## Adicionar mais cupons
+
+### Pelo painel administrativo (recomendado)
+
+1. Acesse `/admin`, faça login e abra **Cupons (CSV)**.
+2. Clique em **Selecionar CSV** ou em **Colar códigos**.
+3. Envie até 5.000 códigos por lote. Em texto, use um código por linha ou separe-os por vírgula/ponto e vírgula.
+4. Confira o resultado apresentado pelo painel: quantidade inserida e quantidade ignorada.
+5. Verifique na lista se os novos cupons aparecem com status **Disponível**.
+
+O CSV mais simples possui uma única coluna. O cabeçalho `code`, `codigo` ou `código` é opcional:
+
+```csv
+code
+GENTE-REAL-0001
+GENTE-REAL-0002
+GENTE-REAL-0003
+```
+
+Os cupons são vinculados à campanha ativa. O painel remove espaços, converte os códigos para maiúsculas e ignora repetições do lote ou códigos já existentes. Cada código pode ter no máximo 80 caracteres. A importação não modifica cupons já atribuídos.
+
+### Pela API administrativa
+
+No Swagger (`/api/docs`), autorize com o `ADMIN_API_TOKEN` e execute `POST /api/admin/coupons/import`:
+
+```json
+{
+  "codes": ["GENTE-REAL-0001", "GENTE-REAL-0002"]
+}
+```
+
+A resposta informa `inserted` e `ignored`. O endpoint aceita de 1 a 5.000 códigos e registra a operação no histórico administrativo.
+
+### Pelo terminal (alternativa operacional)
+
+O comando abaixo lê a primeira coluna do CSV e exige `DATABASE_URL` apontando para o banco correto:
 
 ```bash
 COUPON_CSV_PATH=/caminho/cupons.csv npm run db:import-coupons
@@ -34,6 +69,8 @@ No PowerShell:
 $env:COUPON_CSV_PATH='C:\caminho\cupons.csv'; npm run db:import-coupons
 ```
 
+Em Docker/Coolify, o caminho precisa existir dentro do container da API. Prefira o painel para produção. Não execute novamente o seed para adicionar estoque, não insira diretamente no PostgreSQL e não edite o Google Sheets: o PostgreSQL é a fonte de verdade e a planilha é apenas um espelho operacional.
+
 ## Deploy no Coolify
 
 Estado de homologação em 01/08/2026:
@@ -42,11 +79,11 @@ Estado de homologação em 01/08/2026:
 - API: `https://api-cupom.r0b14.com`.
 - Health: `https://api-cupom.r0b14.com/api/health`.
 - Swagger: `https://api-cupom.r0b14.com/api/docs`.
-- PostgreSQL 16, API, frontend e painel administrativo estão publicados e saudáveis; n8n/Evolution/Sheets permanecem pendentes.
+- PostgreSQL 16, API, frontend, painel administrativo e n8n estão publicados e saudáveis. Evolution, callback e Google Sheets foram validados de ponta a ponta; o lote atual ainda é de homologação.
 
 - Crie PostgreSQL persistente no Coolify e configure `DATABASE_URL` na API.
 - Crie dois serviços a partir deste repositório: API usando `backend/Dockerfile` e Web usando `frontend/Dockerfile`; defina seus domínios HTTPS.
-- Defina `FRONTEND_URL` na API e construa a Web com `NEXT_PUBLIC_API_URL=https://api.seudominio.com/api`.
+- Defina `FRONTEND_URL` na API e construa a Web com `NEXT_PUBLIC_API_URL=https://api.seudominio.com/api` e `NEXT_PUBLIC_SITE_URL=https://seudominio.com` (usado em metadados, `sitemap.xml`, `robots.txt` e na imagem de Open Graph).
 - No frontend, mantenha `ADMIN_API_URL`, `ADMIN_API_TOKEN`, `ADMIN_PANEL_PASSWORD` e `ADMIN_SESSION_SECRET` somente no runtime. Nunca use `NEXT_PUBLIC_` para esses valores.
 - No Next standalone, configure `HOSTNAME=0.0.0.0` e `PORT=3000` em runtime. Use `127.0.0.1`, não `localhost`, nos health checks internos.
 - Hospede n8n como serviço separado, com volume persistente, `N8N_ENCRYPTION_KEY` e `WEBHOOK_URL` públicos. Configure `N8N_DELIVERY_WEBHOOK_URL` na API com a URL do webhook n8n.

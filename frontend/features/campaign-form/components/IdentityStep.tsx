@@ -42,10 +42,12 @@ export function IdentityStep({
           WhatsApp<span className="text-red-600"> *</span>
         </span>
         <input
+          type="tel"
           value={phone}
           onChange={(event) => onPhoneChange(formatPhone(event.target.value))}
           inputMode="tel"
           autoComplete="tel"
+          maxLength={15}
           placeholder="(11) 91234-5678"
           className={`h-[52px] rounded-[14px] border-[1.5px] px-4 text-base text-[#1b1830] placeholder:text-[#a29fc0] transition-colors focus:outline-none focus:ring-2 focus:ring-[#4338ca]/25 ${
             errors.phone ? "border-red-600" : "border-[#e7e5f0] hover:border-[#b7b1ef]"

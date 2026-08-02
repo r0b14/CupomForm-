@@ -49,8 +49,8 @@ export function CampaignForm() {
       (_, index) =>
         campaign.questions.slice(
           index * QUESTION_PAGE_SIZE,
-          (index + 1) * QUESTION_PAGE_SIZE
-        )
+          (index + 1) * QUESTION_PAGE_SIZE,
+        ),
     );
   }, [campaign]);
 
@@ -58,7 +58,7 @@ export function CampaignForm() {
   const isIdentityStep = step === 1;
   const isConsentStep = step === totalSteps;
   const activeQuestions =
-    !isIdentityStep && !isConsentStep ? questionPages[step - 2] ?? [] : [];
+    !isIdentityStep && !isConsentStep ? (questionPages[step - 2] ?? []) : [];
 
   useEffect(() => {
     const isPreview =
@@ -172,7 +172,7 @@ export function CampaignForm() {
       setRequestError(
         reason instanceof Error
           ? reason.message
-          : "Não foi possível solicitar o envio."
+          : "Não foi possível solicitar o envio.",
       );
       setDeliveryState("idle");
     }
