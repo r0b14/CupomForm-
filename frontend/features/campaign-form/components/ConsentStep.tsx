@@ -14,12 +14,23 @@ export function ConsentStep({
   errors,
 }: ConsentStepProps) {
   return (
-    <div className="space-y-2">
-      <label className="flex cursor-pointer items-start gap-3 rounded-[14px] bg-[#f7f6fc] border border-[#e7e5f0] p-4 transition-all hover:bg-[#efeefc] hover:border-[#b7b1ef]">
+    <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
+      <div>
+        <span className="text-3xl">🙏</span>
+        <h2 className="mt-3 text-lg font-extrabold text-[#1b1830]">
+          Obrigado por responder!
+        </h2>
+        <p className="mt-1.5 text-[13.5px] leading-5 text-[#6b6785]">
+          Suas respostas ajudam o projeto Gente Daqui a levar mais oportunidades
+          para o seu bairro. Falta só confirmar para liberar seu cupom.
+        </p>
+      </div>
+      <label className="flex w-full cursor-pointer items-start gap-3 rounded-[14px] bg-[#f7f6fc] border border-[#e7e5f0] p-4 text-left transition-all hover:bg-[#efeefc] hover:border-[#b7b1ef]">
         <input
           type="checkbox"
           checked={consent}
           onChange={(event) => onConsentChange(event.target.checked)}
+          required
           className="mt-0.5 size-[22px] shrink-0 accent-[#4338ca] cursor-pointer"
         />
         <span className="text-[13px] leading-5 text-[#4b4768]">
