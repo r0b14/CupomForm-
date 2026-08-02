@@ -1,4 +1,4 @@
-# Handoff Gemini — integração do painel administrativo
+# Handoff Claude — integração do painel administrativo
 
 **Status:** concluído e publicado no commit `aa4c0c0`; painel validado em produção em 01/08/2026.
 
@@ -62,5 +62,5 @@ Substituir todos os dados demonstrativos de `frontend/app/admin/page.tsx` por da
 ## Comando para execução
 
 ```powershell
-.\scripts\ai-harness.ps1 -Task frontend-implement -Prompt "Implemente integralmente o handoff ai/sprints/SPRINT-03-GEMINI-ADMIN-HANDOFF.md. Preserve a rota pública, não exponha segredos e valide o build." -Run
+.\scripts\ai-harness.ps1 -Task frontend-implement -Prompt "Implemente integralmente o handoff ai/sprints/SPRINT-03-Claude-ADMIN-HANDOFF.md. Preserve a rota pública, não exponha segredos e valide o build." -Run
 ```
