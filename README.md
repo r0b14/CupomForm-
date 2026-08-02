@@ -12,7 +12,7 @@ MVP de formulário de campanha: coleta respostas, reserva um cupom único por Wh
    docker compose exec api npm run prisma:seed -w @cupomform/backend
    ```
 
-   A migração é aplicada automaticamente na inicialização da API. O seed cria a campanha `gente-daqui` e suas 12 perguntas.
+   A migração é aplicada automaticamente na inicialização da API. O seed cria a campanha `gente-daqui` e suas 16 perguntas.
 
    Os quatro cupons de teste `GENTE-005-DEV-*` e `GENTE-010-DEV-*` só são criados quando `SEED_DEV_COUPONS=true` — o `docker-compose.yml` já define isso no serviço `api`. **Nunca defina essa variável em produção:** a ausência dela é o que permite rodar o seed no ambiente real (para corrigir perguntas, por exemplo) sem injetar cupons falsos no estoque. Em produção, os códigos reais entram pelo painel `/admin`.
 

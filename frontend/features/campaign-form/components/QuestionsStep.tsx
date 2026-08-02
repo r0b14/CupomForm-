@@ -1,7 +1,9 @@
+import { Fragment } from "react";
 import { Question, FieldErrors } from "../types";
 import { ChoiceField } from "./ChoiceField";
 import { TextField } from "./TextField";
 import { ScaleField } from "./ScaleField";
+import { ProjectOverview } from "./ProjectOverview";
 import {
   NEIGHBORHOOD_QUESTION_KEY,
   NEIGHBORHOOD_VISIBLE_COUNT,
@@ -22,10 +24,11 @@ export function QuestionsStep({
 }: QuestionsStepProps) {
   return (
     <>
-      {questions.map((question) =>
-        question.type === "SINGLE_CHOICE" ? (
+      {questions.map((question) => (
+        <Fragment key={question.key}>
+          {question.key === "sentido_para_vida" && <ProjectOverview />}
+          {question.type === "SINGLE_CHOICE" ? (
           <ChoiceField
-            key={question.key}
             question={question}
             value={answers[question.key] ?? ""}
             onChange={(value) => onAnswerChange(question.key, value)}
@@ -38,7 +41,6 @@ export function QuestionsStep({
           />
         ) : question.type === "SCALE" ? (
           <ScaleField
-            key={question.key}
             question={question}
             value={answers[question.key] ?? ""}
             onChange={(value) => onAnswerChange(question.key, value)}
@@ -46,14 +48,14 @@ export function QuestionsStep({
           />
         ) : (
           <TextField
-            key={question.key}
             question={question}
             value={answers[question.key] ?? ""}
             onChange={(value) => onAnswerChange(question.key, value)}
             error={errors[question.key]}
           />
-        )
-      )}
+          )}
+        </Fragment>
+      ))}
     </>
   );
 }

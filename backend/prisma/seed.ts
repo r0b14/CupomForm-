@@ -9,7 +9,7 @@ async function main() {
     update: {
       title: 'Gente Daqui — pesquisa rápida',
       subtitle:
-        'Estamos criando um jeito de conectar jovens do bairro a oportunidades reais de trabalho e renda. Leva de 3 a 5 minutinhos.',
+        'Estamos criando um jeito de conectar jovens do bairro a oportunidades reais de trabalho e renda. Para responder leva de 3 a 5 minutinhos. O cupom é só um agrado.',
       privacyText:
         'Autorizo o uso das minhas respostas e do meu WhatsApp para esta pesquisa, para a entrega do cupom e, se eu quiser, para receber informações sobre o piloto Gente Daqui.',
       active: true,
@@ -18,7 +18,7 @@ async function main() {
       slug: 'gente-daqui',
       title: 'Gente Daqui — pesquisa rápida',
       subtitle:
-        'Estamos criando um jeito de conectar jovens do bairro a oportunidades reais de trabalho e renda. Leva de 3 a 5 minutinhos.',
+        'Estamos criando um jeito de conectar jovens do bairro a oportunidades reais de trabalho e renda. Para responder leva de 3 a 5 minutinhos. O cupom é só um agrado.',
       privacyText:
         'Autorizo o uso das minhas respostas e do meu WhatsApp para esta pesquisa, para a entrega do cupom e, se eu quiser, para receber informações sobre o piloto Gente Daqui.',
     },
@@ -63,20 +63,26 @@ async function main() {
       type: QuestionType.SINGLE_CHOICE,
       required: true,
       options: [
-        'Já tenho meu próprio trabalho ou negócio',
+        'Tenho um trabalho CLT ou PJ',
+        'Tenho um negócio',
         'Trabalho por aplicativo',
-        'Estou procurando emprego ou uma oportunidade',
+        'Estou procurando um emprego',
         'Estou estudando',
-        'Nenhuma dessas',
+        'Sou Jovem Aprendiz',
       ],
       position: 3,
     },
     {
       key: 'oportunidade_recente',
-      label: 'Nos últimos 12 meses, você ficou sabendo de algum curso, vaga ou programa gratuito perto de você?',
+      label: 'Nos últimos 6 meses, você ficou sabendo de algum curso, capacitação, vaga ou programa gratuito perto do seu bairro?',
       type: QuestionType.SINGLE_CHOICE,
       required: true,
-      options: ['Sim, e participei', 'Sim, mas não participei', 'Não, nunca fiquei sabendo'],
+      options: [
+        'Sim, e participei',
+        'Sim, mas não participei',
+        'Não, mas gostaria de ter participado',
+        'Não, nunca fiquei sabendo',
+      ],
       position: 4,
     },
     {
@@ -85,28 +91,76 @@ async function main() {
       type: QuestionType.SINGLE_CHOICE,
       required: true,
       options: [
-        'Não tenho tempo, preciso trabalhar',
         'Não sei se é pra mim',
         'Não confio que vai dar em alguma coisa',
-        'É longe ou difícil de chegar',
+        'Não tenho tempo, preciso trabalhar',
+        'É longe da minha residência ou difícil de chegar',
         'Não sabia que existia',
-        'Outro motivo',
       ],
       position: 5,
     },
     {
-      key: 'mensageiro_confiavel',
-      label: 'Quem te deixaria mais à vontade para conhecer uma oportunidade?',
+      key: 'motivo_participacao',
+      label:
+        'Se você tivesse acesso a um programa que te conectasse com pessoas do seu bairro que já passaram por processos semelhantes ao que você deseja, qual seria o principal motivo para participar?',
       type: QuestionType.SINGLE_CHOICE,
       required: true,
       options: [
-        'Uma pessoa conhecida do bairro que já passou por isso',
-        'Um cartaz ou anúncio',
-        'Uma mensagem de WhatsApp de um número que eu não conheço',
-        'Um post em rede social',
-        'Alguém da prefeitura ou de um programa que eu não conheço',
+        'Conseguir um emprego formal',
+        'Conseguir um emprego informal',
+        'Conseguir um estágio',
+        'Ter uma renda extra',
+        'Aprender algo novo',
+        'Ter mais oportunidades',
+        'Outro motivo',
       ],
       position: 6,
+    },
+    {
+      key: 'area_interesse',
+      label: 'Qual dessas áreas você teria mais vontade de aprender ou trabalhar?',
+      type: QuestionType.SINGLE_CHOICE,
+      required: true,
+      options: [
+        'Programação, dados ou inteligência artificial',
+        'Suporte técnico e atendimento ao cliente (telefone, chat ou presencial)',
+        'Energia solar ou internet e fibra óptica',
+        'Trabalho de escritório: administrativo, financeiro, organização de documentos',
+        'Marketing digital, redes sociais e vendas pela internet',
+        'Beleza, gastronomia ou serviço por conta própria',
+        'Audiovisual, música, design, moda ou eventos',
+        'Logística, estoque e entregas',
+      ],
+      position: 7,
+    },
+    {
+      key: 'apoio_primeiro_passo',
+      label: 'Pensando na área que você marcou, para dar o primeiro passo, o que mais te ajudaria hoje?',
+      type: QuestionType.SINGLE_CHOICE,
+      required: true,
+      options: [
+        'Alguém me explicar o que a pessoa faz no dia a dia e quanto dá pra ganhar',
+        'Alguém me mostrar o passo a passo: por onde começar',
+        'Alguém me indicar pra uma vaga, um cliente ou uma seleção',
+        'Um curso gratuito perto de casa',
+        'Um curso que eu faça pelo celular, no meu horário',
+        'Alguém acompanhando de perto enquanto eu tento, pra eu não desistir',
+      ],
+      position: 8,
+    },
+    {
+      key: 'tempo_preparacao',
+      label: 'E para isso acontecer, quanto tempo você toparia se preparar antes de começar a ganhar dinheiro nessa área?',
+      type: QuestionType.SINGLE_CHOICE,
+      required: true,
+      options: [
+        'Só topo se der pra ganhar alguma coisa desde o começo',
+        'Até 1 mês',
+        'De 3 a 6 meses',
+        'Mais de 6 meses, se eu tiver certeza de que vale a pena',
+        'Hoje eu não teria como parar pra estudar',
+      ],
+      position: 9,
     },
     {
       key: 'referencia_local',
@@ -114,15 +168,23 @@ async function main() {
       type: QuestionType.SINGLE_CHOICE,
       required: true,
       options: ['Sim, conheço bem essa pessoa', 'Conheço de vista, mas não converso', 'Não conheço ninguém assim'],
-      position: 7,
+      position: 10,
+    },
+    {
+      key: 'referencia_nome_profissao',
+      label: 'Se você tem alguém como referência, qual é o nome ou apelido dessa pessoa e em que profissão ou área ela trabalha?',
+      type: QuestionType.TEXT,
+      required: false,
+      options: Prisma.JsonNull,
+      position: 11,
     },
     {
       key: 'confianca_programa',
-      label: 'Quanto você confiaria em um programa que te conecta com alguém do seu bairro para ajudar nos próximos passos?',
+      label: 'Quanto você confiaria em um programa que te conecta com alguém do seu bairro para ajudar nos próximos passos profissionais?',
       type: QuestionType.SCALE,
       required: true,
       options: ['1 - Nada', '2', '3', '4', '5 - Muita confiança'],
-      position: 8,
+      position: 12,
     },
     {
       key: 'sentido_para_vida',
@@ -130,7 +192,7 @@ async function main() {
       type: QuestionType.SCALE,
       required: true,
       options: ['1 - Nada a ver', '2', '3', '4', '5 - Faz muito sentido'],
-      position: 9,
+      position: 13,
     },
     {
       key: 'participaria',
@@ -138,7 +200,7 @@ async function main() {
       type: QuestionType.SINGLE_CHOICE,
       required: true,
       options: ['Sim, com certeza', 'Talvez, depende de como funciona', 'Não, não é pra mim'],
-      position: 10,
+      position: 14,
     },
     {
       key: 'canal_acompanhamento',
@@ -152,7 +214,7 @@ async function main() {
         'Encontro presencial no COMPAZ',
         'Outro',
       ],
-      position: 11,
+      position: 15,
     },
     {
       key: 'motivo_desistencia',
@@ -160,11 +222,18 @@ async function main() {
       type: QuestionType.TEXT,
       required: false,
       options: Prisma.JsonNull,
-      position: 12,
+      position: 16,
     },
   ];
 
   await prisma.$transaction(async (tx) => {
+    // As posições são únicas por campanha. Deslocá-las temporariamente evita
+    // colisões ao inserir perguntas no meio da sequência já publicada.
+    await tx.question.updateMany({
+      where: { campaignId: campaign.id },
+      data: { position: { increment: questions.length } },
+    });
+
     await tx.question.deleteMany({
       where: {
         campaignId: campaign.id,

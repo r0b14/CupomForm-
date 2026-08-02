@@ -12,7 +12,7 @@ Depois da importação, confirme que o workflow se chama **CupomForm - Evolution
 
    Na aba `respostas`, use a primeira linha exatamente assim:
 
-   `submission_id`, `name`, `phone`, `created_at`, `coupon_code`, `delivery_status`, `idade`, `bairro`, `situacao_atual`, `oportunidade_recente`, `barreira`, `mensageiro_confiavel`, `referencia_local`, `confianca_programa`, `sentido_para_vida`, `participaria`, `canal_acompanhamento`, `motivo_desistencia`, `answers_json`, `synced_at`
+   `submission_id`, `name`, `phone`, `created_at`, `coupon_code`, `delivery_status`, `idade`, `bairro`, `situacao_atual`, `oportunidade_recente`, `barreira`, `motivo_participacao`, `area_interesse`, `apoio_primeiro_passo`, `tempo_preparacao`, `referencia_local`, `referencia_nome_profissao`, `confianca_programa`, `sentido_para_vida`, `participaria`, `canal_acompanhamento`, `motivo_desistencia`, `answers_json`, `synced_at`
 
 2. Na workspace do n8n, cadastre a credencial **Google Service Account API** com o e-mail e a chave privada do JSON baixado no Google Cloud. Compartilhe a planilha com o e-mail da conta de serviço. Ela é a única credencial escolhida visualmente no fluxo; nenhuma chave fica no JSON versionado.
 
@@ -38,6 +38,7 @@ Depois da importação, confirme que o workflow se chama **CupomForm - Evolution
 1. Entre na workspace nova e escolha **Import from File**.
 2. Selecione `n8n/workflows/cupomform-delivery.json`.
 3. Nos nós **Google Sheets - auditoria** e **Google Sheets - espelho de respostas**, escolha a mesma credencial Google e confirme a planilha/aba correspondente.
+   Se a planilha já existe, atualize os cabeçalhos da aba `respostas` para a linha acima antes de ativar este workflow.
 4. Abra o nó **Evolution API - enviar texto** e confirme o endpoint de sua versão da Evolution. O fluxo está preparado para o padrão v2: `POST /message/sendText/{instância}` com `apikey`; em **Specify Body**, use **Using Fields Below** com os campos `number={{ $json.phone }}` e `text={{ $json.message }}`.
 5. Execute manualmente pelo gatilho **Sincronizar agora** e confirme que as submissões existentes aparecem uma única vez na aba `respostas`.
 6. Salve e ative o workflow. A URL de produção passa a ser `https://SEU-N8N/webhook/cupom-delivery`, e o espelho é atualizado a cada cinco minutos.
