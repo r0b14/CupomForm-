@@ -31,6 +31,11 @@ export class CouponQueryDto {
   @IsOptional() @IsEnum(CouponStatus) status?: CouponStatus;
 }
 
+export class ResponsesQueryDto {
+  /** JSON `{ "<chave da pergunta>": ["valor", ...] }`. Ver AdminService.parseResponseFilters. */
+  @IsOptional() @IsString() @MaxLength(4000) filters?: string;
+}
+
 export class DeliveryQueryDto {
   @IsOptional() @IsEnum(DeliveryStatus) status?: DeliveryStatus;
 }

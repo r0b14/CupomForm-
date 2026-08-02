@@ -31,19 +31,57 @@ type Participant = {
   delivery: { status: DeliveryStatus; updatedAt: string } | null;
 };
 
+type ResponseSlice = {
+  value: string;
+  count: number;
+  percentage: number;
+  /** false = valor gravado antes de a opção ser renomeada ou removida. */
+  inOptions: boolean;
+};
+
 type ResponseQuestion = {
   key: string;
   label: string;
   type: string;
   required: boolean;
+  options: string[] | null;
   answered: number;
-  distribution: { value: string; count: number; percentage: number }[];
+  average: number | null;
+  distribution: ResponseSlice[];
+  samples: string[];
 };
 
 type ResponsesData = {
   total: number;
+  /** Total após o recorte aplicado. */
+  filtered: number;
+  /** Recorte que o backend realmente aplicou. */
+  filters: Record<string, string[]>;
   questions: ResponseQuestion[];
 };
+
+/** Formas de apresentação disponíveis para uma pergunta com alternativas. */
+type ChartKind = "bars" | "columns" | "donut" | "table";
+
+const chartLabels: Record<ChartKind, string> = {
+  bars: "Barras",
+  columns: "Colunas",
+  donut: "Rosca",
+  table: "Tabela",
+};
+
+const chartPalette = [
+  "#4338ca",
+  "#0891b2",
+  "#059669",
+  "#b45309",
+  "#be123c",
+  "#7c3aed",
+  "#0369a1",
+  "#65a30d",
+  "#c2410c",
+  "#9333ea",
+];
 
 type CampaignData = {
   id: string;
@@ -640,62 +678,530 @@ function ParticipantTable({ rows }: { rows: Participant[] }) {
 function ResponsesView() {
   const [data, setData] = useState<ResponsesData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<Record<string, string[]>>({});
 
-  async function loadResponses() {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/admin/responses");
-      if (!res.ok) throw new Error("Erro ao carregar estatísticas de respostas.");
-      const json = await res.json();
-      setData(json);
-    } catch (err: any) {
-      setError(err.message || "Falha de conexão.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  // Serializado para servir de dependência estável do efeito e de query.
+  const filtersKey = JSON.stringify(filters);
 
   useEffect(() => {
-    loadResponses();
-  }, []);
+    let active = true;
+    const isFirstLoad = data === null;
+    if (isFirstLoad) setLoading(true);
+    else setRefreshing(true);
+    setError(null);
+
+    const active_filters = JSON.parse(filtersKey) as Record<string, string[]>;
+    const query = Object.keys(active_filters).length
+      ? `?filters=${encodeURIComponent(filtersKey)}`
+      : "";
+
+    fetch(`/api/admin/responses${query}`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Erro ao carregar estatísticas de respostas.");
+        return (await res.json()) as ResponsesData;
+      })
+      .then((json) => {
+        if (!active) return;
+        setData(json);
+        // O backend descarta filtros de perguntas que não existem mais; sem
+        // este ajuste o painel mostraria um recorte que não foi aplicado.
+        if (JSON.stringify(json.filters) !== filtersKey) setFilters(json.filters);
+      })
+      .catch((err: any) => {
+        if (!active) return;
+        setError(err.message || "Falha de conexão.");
+      })
+      .finally(() => {
+        if (!active) return;
+        setLoading(false);
+        setRefreshing(false);
+      });
+
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtersKey]);
+
+  function toggleFilter(key: string, value: string) {
+    setFilters((current) => {
+      const values = current[key] ?? [];
+      const next = values.includes(value)
+        ? values.filter((item) => item !== value)
+        : [...values, value];
+      const updated = { ...current };
+      if (next.length) updated[key] = next;
+      else delete updated[key];
+      return updated;
+    });
+  }
 
   if (loading) return <LoadingState message="Carregando estatísticas..." />;
-  if (error || !data) return <ErrorState message={error || "Erro ao carregar respostas."} onRetry={loadResponses} />;
+  if (error || !data)
+    return (
+      <ErrorState
+        message={error || "Erro ao carregar respostas."}
+        onRetry={() => setFilters((current) => ({ ...current }))}
+      />
+    );
+
+  const filterCount = Object.values(data.filters).reduce((acc, values) => acc + values.length, 0);
+  const share = data.total ? Math.round((data.filtered / data.total) * 1000) / 10 : 0;
 
   return (
     <div className="space-y-5">
-      <Metric label="Total de formulários concluídos" value={data.total} tone="emerald" />
-
-      <div className="space-y-5">
-        {data.questions.map((question) => (
-          <Card key={question.key}>
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#ebe9f5] pb-3">
-              <h3 className="font-extrabold text-base text-[#1b1830]">{question.label}</h3>
-              <span className="text-xs font-bold text-[#8b87a8]">
-                {question.answered} de {data.total} responderam
-              </span>
-            </div>
-
-            {question.distribution && question.distribution.length > 0 ? (
-              <div className="mt-4 space-y-3">
-                {question.distribution.map((item, idx) => (
-                  <div key={idx} className="grid grid-cols-[minmax(145px,1fr)_2fr_60px] items-center gap-3 text-sm">
-                    <span className="font-bold text-[#4b4768] truncate" title={item.value}>{item.value}</span>
-                    <div className="h-3 rounded-full bg-[#f0eff7] overflow-hidden">
-                      <div className="h-full rounded-full bg-[#4338ca]" style={{ width: `${Math.min(item.percentage, 100)}%` }} />
-                    </div>
-                    <strong className="text-right text-xs text-[#1b1830]">{item.percentage}% ({item.count})</strong>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="mt-3 text-sm text-[#8b87a8]">Nenhuma resposta registrada para esta pergunta ainda.</p>
-            )}
-          </Card>
-        ))}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Metric label="Formulários concluídos" value={data.total} tone="emerald" />
+        <Metric
+          label={filterCount ? "No recorte selecionado" : "Sem recorte aplicado"}
+          value={filterCount ? `${data.filtered} (${share}%)` : data.filtered}
+          tone={filterCount ? "indigo" : "slate"}
+        />
       </div>
+
+      <ResponseFilterBar
+        questions={data.questions}
+        filters={data.filters}
+        onToggle={toggleFilter}
+        onClear={() => setFilters({})}
+      />
+
+      {data.filtered === 0 ? (
+        <EmptyState
+          title="Nenhum participante neste recorte"
+          description="Combine menos filtros para voltar a ver distribuições."
+        />
+      ) : (
+        <div className={`space-y-5 transition-opacity ${refreshing ? "opacity-50" : "opacity-100"}`}>
+          {data.questions.map((question) => (
+            <QuestionCard
+              key={question.key}
+              question={question}
+              filtered={data.filtered}
+              activeValues={data.filters[question.key] ?? []}
+              onToggleFilter={toggleFilter}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Monta os filtros a partir das próprias perguntas — nenhuma chave fixa aqui. */
+function ResponseFilterBar({
+  questions,
+  filters,
+  onToggle,
+  onClear,
+}: {
+  questions: ResponseQuestion[];
+  filters: Record<string, string[]>;
+  onToggle: (key: string, value: string) => void;
+  onClear: () => void;
+}) {
+  // Só faz sentido filtrar por pergunta de alternativas: texto livre é único.
+  const filterable = questions.filter((question) => question.type !== "TEXT" && question.distribution.length);
+  const [questionKey, setQuestionKey] = useState("");
+
+  const selected = filterable.find((question) => question.key === questionKey) ?? null;
+  const chips = Object.entries(filters).flatMap(([key, values]) =>
+    values.map((value) => ({ key, value, label: questions.find((q) => q.key === key)?.label ?? key })),
+  );
+
+  if (!filterable.length) return null;
+
+  return (
+    <Card>
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="flex min-w-[220px] flex-1 flex-col gap-1.5">
+          <span className="text-xs font-extrabold uppercase tracking-[.08em] text-[#8b87a8]">Filtrar por</span>
+          <select
+            value={questionKey}
+            onChange={(event) => setQuestionKey(event.target.value)}
+            className="h-11 rounded-xl border border-[#ded9f0] bg-white px-3 text-sm font-bold text-[#1b1830] focus:outline-none focus:ring-2 focus:ring-[#4338ca]/25"
+          >
+            <option value="">Escolha uma pergunta…</option>
+            {filterable.map((question) => (
+              <option key={question.key} value={question.key}>
+                {question.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {selected && (
+          <label className="flex min-w-[220px] flex-1 flex-col gap-1.5">
+            <span className="text-xs font-extrabold uppercase tracking-[.08em] text-[#8b87a8]">Resposta</span>
+            <select
+              value=""
+              onChange={(event) => {
+                if (event.target.value) onToggle(selected.key, event.target.value);
+              }}
+              className="h-11 rounded-xl border border-[#ded9f0] bg-white px-3 text-sm font-bold text-[#1b1830] focus:outline-none focus:ring-2 focus:ring-[#4338ca]/25"
+            >
+              <option value="">Adicionar valor…</option>
+              {selected.distribution.map((item) => (
+                <option
+                  key={item.value}
+                  value={item.value}
+                  disabled={(filters[selected.key] ?? []).includes(item.value)}
+                >
+                  {item.value} ({item.count})
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
+
+      {chips.length > 0 && (
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[#ebe9f5] pt-4">
+          {chips.map((chip) => (
+            <button
+              key={`${chip.key}:${chip.value}`}
+              type="button"
+              onClick={() => onToggle(chip.key, chip.value)}
+              title={`${chip.label}: ${chip.value} — clique para remover`}
+              className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#eceafc] px-3 py-1.5 text-xs font-extrabold text-[#4338ca] transition hover:bg-[#ded9f8]"
+            >
+              <span className="truncate">{chip.value}</span>
+              <span aria-hidden="true">×</span>
+              <span className="sr-only">Remover filtro</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={onClear}
+            className="ml-auto text-xs font-extrabold text-[#8b87a8] underline underline-offset-2 hover:text-[#1b1830]"
+          >
+            Limpar tudo
+          </button>
+        </div>
+      )}
+
+      <p className="mt-3 text-xs text-[#8b87a8]">
+        Vários valores da mesma pergunta somam; perguntas diferentes se cruzam. Clicar em qualquer
+        barra ou fatia abaixo também aplica o filtro.
+      </p>
+    </Card>
+  );
+}
+
+function QuestionCard({
+  question,
+  filtered,
+  activeValues,
+  onToggleFilter,
+}: {
+  question: ResponseQuestion;
+  filtered: number;
+  activeValues: string[];
+  onToggleFilter: (key: string, value: string) => void;
+}) {
+  // Escala é ordinal: colunas na ordem natural comunicam melhor que barras.
+  const defaultKind: ChartKind = question.type === "SCALE" ? "columns" : "bars";
+  const [kind, setKind] = useState<ChartKind>(defaultKind);
+  const [byCount, setByCount] = useState(false);
+
+  const isText = question.type === "TEXT";
+  const slices = useMemo(() => {
+    // Escala mantém sempre a ordem declarada: reordenar por contagem quebraria a leitura.
+    if (!byCount || question.type === "SCALE") return question.distribution;
+    return [...question.distribution].sort((left, right) => right.count - left.count);
+  }, [question.distribution, question.type, byCount]);
+
+  const onSelect = (value: string) => onToggleFilter(question.key, value);
+
+  return (
+    <Card>
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#ebe9f5] pb-3">
+        <div className="min-w-[200px] flex-1">
+          <h3 className="font-extrabold text-base text-[#1b1830]">{question.label}</h3>
+          <p className="mt-1 text-xs font-bold text-[#8b87a8]">
+            {question.answered} de {filtered} responderam
+            {question.average !== null && (
+              <> · média <strong className="text-[#4338ca]">{question.average}</strong></>
+            )}
+            {!question.required && <> · opcional</>}
+          </p>
+        </div>
+
+        {!isText && (
+          <div className="flex flex-wrap items-center gap-1">
+            {(["bars", "columns", "donut", "table"] as ChartKind[]).map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setKind(option)}
+                aria-pressed={kind === option}
+                className={`h-8 rounded-lg px-2.5 text-xs font-extrabold transition ${
+                  kind === option
+                    ? "bg-[#4338ca] text-white"
+                    : "bg-[#f4f3fa] text-[#6b6785] hover:bg-[#eceafc]"
+                }`}
+              >
+                {chartLabels[option]}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {isText ? (
+        <SamplesList samples={question.samples} />
+      ) : question.distribution.length === 0 ? (
+        <p className="mt-3 text-sm text-[#8b87a8]">Nenhuma resposta registrada para esta pergunta ainda.</p>
+      ) : (
+        <>
+          {kind !== "columns" && question.type !== "SCALE" && (
+            <div className="mt-3 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setByCount((current) => !current)}
+                className="text-xs font-extrabold text-[#6b6785] underline underline-offset-2 hover:text-[#1b1830]"
+              >
+                {byCount ? "Ordem da pergunta" : "Mais escolhidas primeiro"}
+              </button>
+            </div>
+          )}
+
+          <div className="mt-4">
+            {kind === "bars" && <BarsChart slices={slices} activeValues={activeValues} onSelect={onSelect} />}
+            {kind === "columns" && <ColumnsChart slices={slices} activeValues={activeValues} onSelect={onSelect} />}
+            {kind === "donut" && <DonutChart slices={slices} activeValues={activeValues} onSelect={onSelect} />}
+            {kind === "table" && <TableChart slices={slices} activeValues={activeValues} onSelect={onSelect} />}
+          </div>
+        </>
+      )}
+    </Card>
+  );
+}
+
+type ChartProps = {
+  slices: ResponseSlice[];
+  activeValues: string[];
+  onSelect: (value: string) => void;
+};
+
+/** Marca valores gravados fora da lista de opções vigente. */
+function LegacyTag() {
+  return (
+    <span
+      title="Valor gravado antes de a opção atual existir"
+      className="ml-1.5 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-extrabold text-amber-800"
+    >
+      antigo
+    </span>
+  );
+}
+
+function BarsChart({ slices, activeValues, onSelect }: ChartProps) {
+  return (
+    <div className="space-y-2.5">
+      {slices.map((item) => {
+        const active = activeValues.includes(item.value);
+        return (
+          <button
+            key={item.value}
+            type="button"
+            onClick={() => onSelect(item.value)}
+            aria-pressed={active}
+            className={`grid w-full grid-cols-[minmax(120px,1fr)_2fr_78px] items-center gap-3 rounded-lg px-1.5 py-1 text-left text-sm transition hover:bg-[#f7f6fc] ${
+              active ? "bg-[#f2f0fd]" : ""
+            }`}
+          >
+            <span
+              className={`flex items-center truncate font-bold ${item.count ? "text-[#4b4768]" : "text-[#a9a5c0]"}`}
+              title={item.value}
+            >
+              <span className="truncate">{item.value}</span>
+              {!item.inOptions && <LegacyTag />}
+            </span>
+            <span className="h-3 overflow-hidden rounded-full bg-[#f0eff7]">
+              <span
+                className="block h-full rounded-full transition-all"
+                style={{
+                  width: `${Math.min(item.percentage, 100)}%`,
+                  background: active ? "#312a9e" : "#4338ca",
+                }}
+              />
+            </span>
+            <strong className="text-right text-xs text-[#1b1830]">
+              {item.percentage}% ({item.count})
+            </strong>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ColumnsChart({ slices, activeValues, onSelect }: ChartProps) {
+  const max = Math.max(...slices.map((item) => item.count), 1);
+  return (
+    <div className="flex items-end gap-2 overflow-x-auto pb-1">
+      {slices.map((item) => {
+        const active = activeValues.includes(item.value);
+        return (
+          <button
+            key={item.value}
+            type="button"
+            onClick={() => onSelect(item.value)}
+            aria-pressed={active}
+            title={`${item.value}: ${item.count} (${item.percentage}%)`}
+            className={`flex min-w-[64px] flex-1 flex-col items-center gap-1.5 rounded-lg px-1 py-1.5 transition hover:bg-[#f7f6fc] ${
+              active ? "bg-[#f2f0fd]" : ""
+            }`}
+          >
+            <span className="text-xs font-extrabold text-[#1b1830]">{item.count}</span>
+            <span className="flex h-28 w-full items-end">
+              <span
+                className="w-full rounded-t-md transition-all"
+                style={{
+                  height: `${Math.max((item.count / max) * 100, item.count ? 4 : 1.5)}%`,
+                  background: active ? "#312a9e" : item.count ? "#4338ca" : "#e4e1f2",
+                }}
+              />
+            </span>
+            <span className="line-clamp-2 text-center text-[11px] font-bold leading-tight text-[#6b6785]">
+              {item.value}
+            </span>
+            <span className="text-[10px] font-bold text-[#8b87a8]">{item.percentage}%</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function DonutChart({ slices, activeValues, onSelect }: ChartProps) {
+  const present = slices.filter((item) => item.count > 0);
+  const totalCount = present.reduce((acc, item) => acc + item.count, 0);
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+
+  let offset = 0;
+  const arcs = present.map((item, index) => {
+    const length = totalCount ? (item.count / totalCount) * circumference : 0;
+    const arc = { item, length, offset, color: chartPalette[index % chartPalette.length] };
+    offset += length;
+    return arc;
+  });
+
+  return (
+    <div className="flex flex-wrap items-center gap-6">
+      <svg viewBox="0 0 140 140" className="size-40 shrink-0" role="img" aria-label="Distribuição em rosca">
+        <circle cx="70" cy="70" r={radius} fill="none" stroke="#f0eff7" strokeWidth="20" />
+        {arcs.map(({ item, length, offset: start, color }) => (
+          <circle
+            key={item.value}
+            cx="70"
+            cy="70"
+            r={radius}
+            fill="none"
+            stroke={color}
+            strokeWidth={activeValues.includes(item.value) ? 26 : 20}
+            strokeDasharray={`${length} ${circumference - length}`}
+            strokeDashoffset={-start}
+            transform="rotate(-90 70 70)"
+          />
+        ))}
+        <text x="70" y="66" textAnchor="middle" className="fill-[#1b1830] text-[18px] font-extrabold">
+          {totalCount}
+        </text>
+        <text x="70" y="82" textAnchor="middle" className="fill-[#8b87a8] text-[9px] font-bold">
+          respostas
+        </text>
+      </svg>
+
+      <ul className="min-w-[180px] flex-1 space-y-1.5">
+        {arcs.map(({ item, color }) => {
+          const active = activeValues.includes(item.value);
+          return (
+            <li key={item.value}>
+              <button
+                type="button"
+                onClick={() => onSelect(item.value)}
+                aria-pressed={active}
+                className={`flex w-full items-center gap-2 rounded-lg px-1.5 py-1 text-left text-sm transition hover:bg-[#f7f6fc] ${
+                  active ? "bg-[#f2f0fd]" : ""
+                }`}
+              >
+                <span className="size-3 shrink-0 rounded-sm" style={{ background: color }} />
+                <span className="flex-1 truncate font-bold text-[#4b4768]" title={item.value}>
+                  {item.value}
+                  {!item.inOptions && <LegacyTag />}
+                </span>
+                <strong className="text-xs text-[#1b1830]">{item.percentage}%</strong>
+              </button>
+            </li>
+          );
+        })}
+        {present.length === 0 && <li className="text-sm text-[#8b87a8]">Sem respostas neste recorte.</li>}
+      </ul>
+    </div>
+  );
+}
+
+function TableChart({ slices, activeValues, onSelect }: ChartProps) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[380px] text-sm">
+        <thead>
+          <tr className="border-b border-[#ebe9f5] text-left text-xs font-extrabold uppercase tracking-[.06em] text-[#8b87a8]">
+            <th className="py-2">Resposta</th>
+            <th className="py-2 text-right">Pessoas</th>
+            <th className="py-2 text-right">Percentual</th>
+          </tr>
+        </thead>
+        <tbody>
+          {slices.map((item) => {
+            const active = activeValues.includes(item.value);
+            return (
+              <tr
+                key={item.value}
+                onClick={() => onSelect(item.value)}
+                className={`cursor-pointer border-b border-[#f4f3fa] transition hover:bg-[#f7f6fc] ${
+                  active ? "bg-[#f2f0fd]" : ""
+                }`}
+              >
+                <td className={`py-2 font-bold ${item.count ? "text-[#4b4768]" : "text-[#a9a5c0]"}`}>
+                  {item.value}
+                  {!item.inOptions && <LegacyTag />}
+                </td>
+                <td className="py-2 text-right font-extrabold text-[#1b1830]">{item.count}</td>
+                <td className="py-2 text-right text-[#6b6785]">{item.percentage}%</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SamplesList({ samples }: { samples: string[] }) {
+  if (!samples.length) {
+    return <p className="mt-3 text-sm text-[#8b87a8]">Nenhuma resposta escrita neste recorte.</p>;
+  }
+  return (
+    <div className="mt-4">
+      <p className="mb-2 text-xs font-extrabold uppercase tracking-[.08em] text-[#8b87a8]">
+        Respostas mais recentes ({samples.length})
+      </p>
+      <ul className="max-h-72 space-y-2 overflow-y-auto pr-1">
+        {samples.map((sample, index) => (
+          <li
+            key={`${index}-${sample.slice(0, 12)}`}
+            className="rounded-xl bg-[#f7f6fc] px-3 py-2 text-sm leading-relaxed text-[#4b4768]"
+          >
+            {sample}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

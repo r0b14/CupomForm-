@@ -71,42 +71,159 @@ export class AdminService {
     });
   }
 
-  async responses() {
+  /** Amostras de texto livre devolvidas por pergunta aberta. */
+  private static readonly TEXT_SAMPLE_LIMIT = 60;
+
+  /**
+   * Estatísticas por pergunta, opcionalmente restritas a um recorte.
+   *
+   * Nada aqui conhece uma pergunta específica: tudo é derivado da tabela
+   * Question, então perguntas novas, removidas ou com tipo trocado passam a
+   * valer sem alterar este código nem o painel.
+   */
+  async responses(rawFilters?: string) {
     const campaign = await this.campaign();
     const [questions, submissions] = await Promise.all([
       this.prisma.question.findMany({
         where: { campaignId: campaign.id },
         orderBy: { position: 'asc' },
-        select: { key: true, label: true, type: true, required: true },
+        select: { key: true, label: true, type: true, required: true, options: true },
       }),
       this.prisma.submission.findMany({
         where: { campaignId: campaign.id },
+        orderBy: { createdAt: 'desc' },
         select: { answers: true },
       }),
     ]);
 
-    const total = submissions.length;
+    const filters = this.parseResponseFilters(rawFilters, questions.map((q) => q.key));
+    const filterEntries = Object.entries(filters);
+    const selected = filterEntries.length
+      ? submissions.filter(({ answers }) =>
+          filterEntries.every(([key, accepted]) => {
+            const value = this.answerValue(answers, key);
+            return value !== undefined && accepted.includes(value);
+          }),
+        )
+      : submissions;
+
+    const filtered = selected.length;
+
     return {
-      total,
+      total: submissions.length,
+      filtered,
+      filters,
       questions: questions.map((question) => {
-        const values = submissions
+        const options = this.questionOptions(question.options);
+        const values = selected
           .map(({ answers }) => this.answerValue(answers, question.key))
           .filter((value): value is string => Boolean(value));
+
         const counts = new Map<string, number>();
         values.forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1));
-        return {
-          ...question,
+
+        const base = {
+          key: question.key,
+          label: question.label,
+          type: question.type,
+          required: question.required,
+          options,
           answered: values.length,
-          distribution: [...counts.entries()]
-            .map(([value, count]) => ({
-              value,
-              count,
-              percentage: total ? Math.round((count / total) * 10_000) / 100 : 0,
-            }))
-            .sort((left, right) => right.count - left.count),
+        };
+
+        // Texto livre não tem distribuição útil: cada resposta é única.
+        if (question.type === 'TEXT') {
+          return {
+            ...base,
+            average: null,
+            distribution: [],
+            samples: values.slice(0, AdminService.TEXT_SAMPLE_LIMIT),
+          };
+        }
+
+        // Opções declaradas vêm sempre, mesmo com zero — some-las esconderia
+        // que ninguém escolheu aquela alternativa. Valores fora da lista
+        // (respostas gravadas antes de a opção ser renomeada) vêm depois,
+        // marcados, em vez de desaparecerem do relatório.
+        const declared = options ?? [];
+        const extras = [...counts.keys()].filter((value) => !declared.includes(value));
+        const ordered = [...declared, ...extras.sort()];
+
+        const distribution = ordered.map((value) => {
+          const count = counts.get(value) ?? 0;
+          return {
+            value,
+            count,
+            percentage: filtered ? Math.round((count / filtered) * 10_000) / 100 : 0,
+            inOptions: declared.includes(value),
+          };
+        });
+
+        return {
+          ...base,
+          average: question.type === 'SCALE' ? this.scaleAverage(values, declared) : null,
+          distribution,
+          samples: [],
         };
       }),
     };
+  }
+
+  /**
+   * Recorte pedido pelo painel: `{"bairro":["Afogados"],"idade":["18 a 20"]}`.
+   * Vários valores na mesma pergunta somam (OU); perguntas diferentes
+   * restringem (E). Chaves desconhecidas são descartadas e o recorte
+   * efetivamente aplicado volta na resposta, para o painel não exibir um
+   * filtro que o backend ignorou.
+   */
+  private parseResponseFilters(raw: string | undefined, validKeys: string[]): Record<string, string[]> {
+    if (!raw?.trim()) return {};
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      throw new BadRequestException('Filtro de respostas inválido.');
+    }
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new BadRequestException('Filtro de respostas inválido.');
+    }
+
+    const filters: Record<string, string[]> = {};
+    for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+      if (!validKeys.includes(key)) continue;
+      const values = (Array.isArray(value) ? value : [value])
+        .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+        .map((item) => item.trim());
+      if (values.length) filters[key] = [...new Set(values)];
+    }
+    return filters;
+  }
+
+  private questionOptions(options: Prisma.JsonValue): string[] | null {
+    if (!Array.isArray(options)) return null;
+    const values = options.filter((option): option is string => typeof option === 'string');
+    return values.length ? values : null;
+  }
+
+  /**
+   * Média de uma escala. O número vem do rótulo (`"1 - Nada"` → 1) e, quando
+   * ele não traz dígito, da posição na lista de opções — assim uma escala
+   * rotulada só com palavras continua tendo média.
+   */
+  private scaleAverage(values: string[], options: string[]): number | null {
+    if (!values.length) return null;
+    const numbers = values
+      .map((value) => {
+        const fromLabel = /^\s*(\d+)/.exec(value)?.[1];
+        if (fromLabel) return Number(fromLabel);
+        const index = options.indexOf(value);
+        return index >= 0 ? index + 1 : null;
+      })
+      .filter((number): number is number => number !== null);
+    if (!numbers.length) return null;
+    const sum = numbers.reduce((acc, number) => acc + number, 0);
+    return Math.round((sum / numbers.length) * 100) / 100;
   }
 
   private answerValue(answers: Prisma.JsonValue, key: string): string | undefined {

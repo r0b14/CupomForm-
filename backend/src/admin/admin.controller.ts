@@ -7,6 +7,7 @@ import {
   DeliveryQueryDto,
   ImportCouponsDto,
   ParticipantQueryDto,
+  ResponsesQueryDto,
   UpdateCampaignDto,
 } from './admin.dto';
 import { AdminService } from './admin.service';
@@ -21,7 +22,7 @@ export class AdminController {
   constructor(private readonly admin: AdminService, private readonly submissions: SubmissionService) {}
   @Get('dashboard') dashboard() { return this.admin.dashboard(); }
   @Get('participants') participants(@Query() query: ParticipantQueryDto) { return this.admin.participants(query.query?.trim(), query.status); }
-  @Get('responses') responses() { return this.admin.responses(); }
+  @Get('responses') responses(@Query() query: ResponsesQueryDto) { return this.admin.responses(query.filters); }
   @Get('campaign') campaign() { return this.admin.getCampaign(); }
   @Patch('campaign') updateCampaign(@Body() dto: UpdateCampaignDto) { return this.admin.updateCampaign(dto); }
   @Get('coupons') coupons(@Query() query: CouponQueryDto) { return this.admin.coupons(query.query?.trim(), query.status); }

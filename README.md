@@ -93,6 +93,15 @@ Regras do schema (`backend/prisma/schema.prisma`) que precisam ser respeitadas:
 - **Renomear o `key` de uma pergunta existente não migra as respostas antigas.** Elas ficam guardadas sob a chave antiga e somem da distribuição em `/admin` → Respostas (que só lê pelo `key` atual das perguntas ativas). Se só o texto mudou, edite apenas o `label` e mantenha o `key`.
 - **Reaproveitar o `key` de uma pergunta removida para uma pergunta com sentido diferente mistura dados antigos e novos** na mesma distribuição. Prefira sempre uma `key` nova quando o que está sendo medido muda de fato.
 
+## Ler os resultados em `/admin` → Respostas
+
+A tela é montada inteiramente a partir do que `GET /api/admin/responses` devolve — que por sua vez vem da tabela `Question`. **Nenhuma pergunta está escrita no código do painel**, então adicionar, remover, reordenar ou trocar o `type` de uma pergunta no seed passa a valer sozinho depois de rodar o seed.
+
+- **Formas de apresentação.** Cada pergunta pode ser vista como barras, colunas, rosca ou tabela. O padrão vem do tipo: `SCALE` abre em colunas na ordem 1→5 (e ganha a média no cabeçalho), `SINGLE_CHOICE` abre em barras. `TEXT` não vira gráfico — mostra as respostas escritas mais recentes, porque cada uma é única.
+- **Filtros.** Escolha uma pergunta e um valor para recortar a base; clicar em qualquer barra, fatia ou linha faz o mesmo. Vários valores da mesma pergunta somam (OU) e perguntas diferentes se cruzam (E). Todas as distribuições e a média das escalas são recalculadas pelo backend sobre o recorte.
+- **Opções sem resposta continuam na lista**, com zero, para não dar a impressão de que a alternativa não existe.
+- **Valores fora da lista de opções atual** aparecem marcados como `antigo`. É o caso de respostas gravadas antes de uma opção ser renomeada — elas continuam contando em vez de sumirem do relatório.
+
 ## Deploy no Coolify
 
 Estado de homologação em 01/08/2026:
