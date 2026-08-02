@@ -25,6 +25,8 @@ export type FieldErrors = Record<string, string>;
 
 export type ScreenState =
   | "loading"
+  // Splash ainda montado, já em fade-out para encadear com a entrada do card.
+  | "splash-exit"
   | "form"
   | "coupon"
   | "soldout"

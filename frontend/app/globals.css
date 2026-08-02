@@ -31,8 +31,110 @@ input, textarea, button { font: inherit; }
   animation: card-in 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Abertura do formulário. A duração da barra é definida inline pelo componente
+   a partir de SPLASH_DURATION_MS, para animação e espera nunca saírem de sincronia. */
+@keyframes splash-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes splash-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes splash-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Cada mensagem entra e sai dentro da própria fatia de tempo. */
+@keyframes splash-message {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  14% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  86% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes splash-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+
+.animate-splash-progress {
+  transform-origin: left center;
+  animation: splash-progress var(--splash-duration, 2400ms) cubic-bezier(0.4, 0, 0.2, 1)
+    forwards;
+}
+
+.animate-splash-orbit {
+  animation: splash-orbit 1400ms linear infinite;
+}
+
+.animate-splash-rise {
+  opacity: 0;
+  animation: splash-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-splash-message {
+  opacity: 0;
+  animation: splash-message var(--splash-message-duration, 800ms) ease-in-out forwards;
+}
+
+.animate-splash-out {
+  animation: splash-out 320ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-card-in {
+  .animate-card-in,
+  .animate-splash-orbit,
+  .animate-splash-out {
     animation: none;
+  }
+
+  /* Mantém o estado final (visível / preenchido) sem o movimento. */
+  .animate-splash-progress {
+    animation: none;
+    transform: scaleX(1);
+  }
+
+  .animate-splash-rise {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* Sem o carrossel, só a mensagem final (que usa splash-rise) fica visível. */
+  .animate-splash-message {
+    animation: none;
+    opacity: 0;
   }
 }

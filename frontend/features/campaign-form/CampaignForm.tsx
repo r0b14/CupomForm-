@@ -11,7 +11,11 @@ import {
 } from "./types";
 import { fetchCampaign, submitSubmission, requestDelivery } from "./api";
 import { previewCampaign } from "./preview-campaign";
-import { NEIGHBORHOOD_QUESTION_KEY } from "./constants";
+import {
+  NEIGHBORHOOD_QUESTION_KEY,
+  SPLASH_DURATION_MS,
+  SPLASH_EXIT_MS,
+} from "./constants";
 import {
   validateIdentityStep,
   validateConsentStep,
@@ -24,6 +28,7 @@ import { ConsentStep } from "./components/ConsentStep";
 import { CouponScreen } from "./components/CouponScreen";
 import { SoldOutScreen } from "./components/SoldOutScreen";
 import { UnavailableScreen } from "./components/UnavailableScreen";
+import { SplashScreen } from "./components/SplashScreen";
 
 const QUESTION_PAGE_SIZE = 3;
 
@@ -59,7 +64,10 @@ export function CampaignForm() {
     return Array.from(
       { length: Math.ceil(paged.length / QUESTION_PAGE_SIZE) },
       (_, index) =>
-        paged.slice(index * QUESTION_PAGE_SIZE, (index + 1) * QUESTION_PAGE_SIZE),
+        paged.slice(
+          index * QUESTION_PAGE_SIZE,
+          (index + 1) * QUESTION_PAGE_SIZE,
+        ),
     );
   }, [campaign]);
 
@@ -70,26 +78,56 @@ export function CampaignForm() {
     !isIdentityStep && !isConsentStep ? (questionPages[step - 2] ?? []) : [];
 
   useEffect(() => {
+    let active = true;
     const isPreview =
       new URLSearchParams(window.location.search).get("preview") === "1";
-    if (isPreview) {
-      setPreviewMode(true);
-      setCampaign(previewCampaign);
-      setScreen("form");
-      return;
-    }
-    let active = true;
-    fetchCampaign()
-      .then((data) => {
+    // Quem pede menos movimento não deve ser retido numa tela decorativa.
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const splashDelay = reducedMotion ? 0 : SPLASH_DURATION_MS;
+    const exitDelay = reducedMotion ? 0 : SPLASH_EXIT_MS;
+
+    const wait = (ms: number) =>
+      new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+    // Deadline em vez de espera fixa: o que a busca já consumiu conta para o
+    // splash, então a abertura nunca soma latência nem à resposta nem ao erro.
+    const startedAt = Date.now();
+    const remainingSplash = () =>
+      Math.max(0, splashDelay - (Date.now() - startedAt));
+
+    async function boot() {
+      try {
+        const data = await (isPreview
+          ? Promise.resolve(previewCampaign)
+          : fetchCampaign());
+        await wait(remainingSplash());
         if (!active) return;
         setCampaign(data);
-        setScreen("form");
-      })
-      .catch((reason: Error) => {
+        setPreviewMode(isPreview);
+      } catch (reason) {
+        await wait(remainingSplash());
         if (!active) return;
-        setRequestError(reason.message);
+        setRequestError(
+          reason instanceof Error
+            ? reason.message
+            : "Não foi possível carregar a campanha.",
+        );
+        setScreen("splash-exit");
+        await wait(exitDelay);
+        if (!active) return;
         setScreen("unavailable");
-      });
+        return;
+      }
+      // Fade-out do splash encadeado com a entrada do card.
+      setScreen("splash-exit");
+      await wait(exitDelay);
+      if (!active) return;
+      setScreen("form");
+    }
+
+    void boot();
     return () => {
       active = false;
     };
@@ -194,15 +232,8 @@ export function CampaignForm() {
     }
   }
 
-  if (screen === "loading") {
-    return (
-      <main className="grid min-h-screen place-items-center bg-[#0b0a1f] p-6 font-[family-name:var(--font-manrope)]">
-        <div className="flex flex-col items-center gap-4 text-sm font-extrabold text-white/70">
-          <span className="size-10 animate-spin rounded-full border-[3px] border-white/15 border-t-[#a9a4ff]" />
-          Carregando campanha…
-        </div>
-      </main>
-    );
+  if (screen === "loading" || screen === "splash-exit") {
+    return <SplashScreen leaving={screen === "splash-exit"} />;
   }
 
   if (screen === "unavailable") {
@@ -228,11 +259,16 @@ export function CampaignForm() {
     <FormShell
       step={step}
       totalSteps={totalSteps}
-      stepKind={isIdentityStep ? "identity" : isConsentStep ? "consent" : "questions"}
+      stepKind={
+        isIdentityStep ? "identity" : isConsentStep ? "consent" : "questions"
+      }
       previewMode={previewMode}
     >
       <form onSubmit={handleSubmit} className="flex min-h-[660px] flex-col">
-        <div key={step} className="flex flex-1 flex-col gap-[22px] px-6 py-6 animate-card-in">
+        <div
+          key={step}
+          className="flex flex-1 flex-col gap-[22px] px-6 py-6 animate-card-in"
+        >
           {isIdentityStep && (
             <IdentityStep
               name={name}
