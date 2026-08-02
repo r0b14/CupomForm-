@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CouponStatus, DeliveryStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { isSupportedCouponCode, normalizeCouponCode } from '../common/coupon';
 import { ImportCouponsDto, UpdateCampaignDto } from './admin.dto';
 
 @Injectable()
@@ -154,8 +155,11 @@ export class AdminService {
 
   async importCoupons(dto: ImportCouponsDto) {
     const campaign = await this.campaign();
-    const codes = [...new Set(dto.codes.map((code) => code.trim().toUpperCase()).filter(Boolean))];
+    const codes = [...new Set(dto.codes.map(normalizeCouponCode).filter(Boolean))];
     if (!codes.length) throw new BadRequestException('Nenhum código válido foi informado.');
+    if (codes.some((code) => !isSupportedCouponCode(code))) {
+      throw new BadRequestException('Use apenas códigos no padrão GENTE-005-* ou GENTE-010-*.');
+    }
     return this.prisma.$transaction(async (tx) => {
       const result = await tx.coupon.createMany({
         data: codes.map((code) => ({ campaignId: campaign.id, code })),

@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { CouponStatus, DeliveryStatus, Prisma, Question } from '@prisma/client';
 import { normalizeBrazilPhone } from '../common/phone';
+import { couponCodePrefix, couponDiscountPercent, CouponDiscountPercent } from '../common/coupon';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
 import { DeliveryStatusDto } from './dto/delivery-status.dto';
@@ -51,10 +52,18 @@ export class SubmissionService {
             };
           }
 
+          const preferredDiscount: CouponDiscountPercent = Math.random() < 0.5 ? 5 : 10;
+          const fallbackDiscount: CouponDiscountPercent = preferredDiscount === 5 ? 10 : 5;
+          const preferredPattern = `${couponCodePrefix(preferredDiscount)}%`;
+          const fallbackPattern = `${couponCodePrefix(fallbackDiscount)}%`;
           const lockedCoupons = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
             SELECT "id" FROM "Coupon"
-            WHERE "campaignId" = ${campaign.id} AND "status" = 'AVAILABLE'
-            ORDER BY "createdAt" ASC
+            WHERE "campaignId" = ${campaign.id}
+              AND "status" = 'AVAILABLE'
+              AND ("code" LIKE ${preferredPattern} OR "code" LIKE ${fallbackPattern})
+            ORDER BY
+              CASE WHEN "code" LIKE ${preferredPattern} THEN 0 ELSE 1 END,
+              "createdAt" ASC
             FOR UPDATE SKIP LOCKED
             LIMIT 1
           `);
@@ -129,6 +138,13 @@ export class SubmissionService {
       return { status: submission.delivery.status, deliveryId: submission.delivery.id };
     }
 
+    const discountPercent = couponDiscountPercent(submission.coupon.code);
+    if (!discountPercent) {
+      throw new BadRequestException(
+        'Este cupom não informa um desconto válido. Use o padrão GENTE-005-* ou GENTE-010-*.',
+      );
+    }
+
     const delivery = await this.prisma.deliveryRequest.upsert({
       where: { submissionId },
       create: { submissionId, status: DeliveryStatus.PENDING },
@@ -151,6 +167,7 @@ export class SubmissionService {
           name: submission.name,
           phone: submission.phone,
           couponCode: submission.coupon.code,
+          discountPercent,
         }),
         signal: AbortSignal.timeout(10_000),
       });

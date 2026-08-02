@@ -14,7 +14,7 @@ MVP de formulário de campanha: coleta respostas, reserva um cupom único por Wh
 
    A migração é aplicada automaticamente na inicialização da API. O seed cria a campanha `gente-daqui` e suas 12 perguntas.
 
-   Os três cupons de teste `GENTE-DEV-*` só são criados quando `SEED_DEV_COUPONS=true` — o `docker-compose.yml` já define isso no serviço `api`. **Nunca defina essa variável em produção:** a ausência dela é o que permite rodar o seed no ambiente real (para corrigir perguntas, por exemplo) sem injetar cupons falsos no estoque. Em produção, os códigos reais entram pelo painel `/admin`.
+   Os quatro cupons de teste `GENTE-005-DEV-*` e `GENTE-010-DEV-*` só são criados quando `SEED_DEV_COUPONS=true` — o `docker-compose.yml` já define isso no serviço `api`. **Nunca defina essa variável em produção:** a ausência dela é o que permite rodar o seed no ambiente real (para corrigir perguntas, por exemplo) sem injetar cupons falsos no estoque. Em produção, os códigos reais entram pelo painel `/admin`.
 
 4. Acesse `http://localhost:3000`; o painel fica em `http://localhost:3000/admin` e o n8n em `http://localhost:5678`.
 
@@ -38,10 +38,13 @@ O CSV mais simples possui uma única coluna. O cabeçalho `code`, `codigo` ou `c
 
 ```csv
 code
-GENTE-REAL-0001
-GENTE-REAL-0002
-GENTE-REAL-0003
+GENTE-005-0001
+GENTE-005-0002
+GENTE-010-0001
+GENTE-010-0002
 ```
+
+O segmento central define o desconto: `005` representa 5% e `010` representa 10%. Outros padrões são rejeitados. Enquanto houver estoque dos dois tipos, o backend sorteia 5% ou 10% com chance de 50% para cada; se o tipo sorteado estiver esgotado, utiliza o outro. A reserva continua transacional e concorrente.
 
 Os cupons são vinculados à campanha ativa. O painel remove espaços, converte os códigos para maiúsculas e ignora repetições do lote ou códigos já existentes. Cada código pode ter no máximo 80 caracteres. A importação não modifica cupons já atribuídos.
 
@@ -51,7 +54,7 @@ No Swagger (`/api/docs`), autorize com o `ADMIN_API_TOKEN` e execute `POST /api/
 
 ```json
 {
-  "codes": ["GENTE-REAL-0001", "GENTE-REAL-0002"]
+  "codes": ["GENTE-005-0001", "GENTE-010-0001"]
 }
 ```
 

@@ -64,7 +64,7 @@
           "conditions": [
             {
               "id": "payload-valid-01",
-              "leftValue": "={{ ($json.body?.deliveryId && $json.body?.submissionId && $json.body?.couponCode && $json.body?.name && $json.body?.phone) ? 'valid' : 'invalid' }}",
+              "leftValue": "={{ (() => { const body = $json.body ?? {}; const discountByCode = { '005': 5, '010': 10 }[String(body.couponCode ?? '').split('-')[1]]; return body.deliveryId && body.submissionId && body.couponCode && body.name && body.phone && discountByCode === Number(body.discountPercent) ? 'valid' : 'invalid'; })() }}",
               "rightValue": "valid",
               "operator": {
                 "type": "string",
@@ -173,7 +173,13 @@
             {
               "id": "3d1e1ec0-8c6d-4f0d-a67a-1bb0207a0010",
               "name": "message",
-              "value": "=Olá, {{ $json.body.name }}! Seu cupom é {{ $json.body.couponCode }}. Guarde este código para usar no estabelecimento.",
+              "value": "=Olá, {{ $json.body.name }}! 🎉\n\nVocê ganhou *{{ $json.body.discountPercent }}% de desconto* no Hortifruti Moranguinho.\n\n🎟️ *Código:* {{ $json.body.couponCode }}\n📍 *Endereço:* R. Cabo Eutrópio, 177 - São José, Recife - PE, 50080-180\n🗺️ *Como chegar:* https://maps.app.goo.gl/qTBxosiMG5y2KoxP9\n📅 *Válido até:* 16/08/2026\n\n*Regras de uso:*\n• Apresente esta mensagem com o cupom no WhatsApp no momento do pagamento.\n• O cupom é intransferível e está vinculado ao seu nome e número de telefone.\n\nAproveite! 💚",
+              "type": "string"
+            },
+            {
+              "id": "4e2f1ec0-8c6d-4f0d-a67a-1bb0207a0032",
+              "name": "discount_percent",
+              "value": "={{ String($json.body.discountPercent) }}",
               "type": "string"
             }
           ]

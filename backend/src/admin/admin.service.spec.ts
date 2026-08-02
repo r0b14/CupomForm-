@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { AdminService } from './admin.service';
 
@@ -54,15 +55,27 @@ describe('AdminService', () => {
     prisma.$transaction.mockImplementation((callback: (client: typeof tx) => unknown) => callback(tx));
 
     await expect(
-      new AdminService(prisma).importCoupons({ codes: [' abc ', 'ABC', 'xyz'] }),
+      new AdminService(prisma).importCoupons({
+        codes: [' gente-005-0001 ', 'GENTE-005-0001', 'gente-010-0001'],
+      }),
     ).resolves.toEqual({ inserted: 2, ignored: 0 });
     expect(tx.coupon.createMany).toHaveBeenCalledWith({
       data: [
-        { campaignId: 'campaign-1', code: 'ABC' },
-        { campaignId: 'campaign-1', code: 'XYZ' },
+        { campaignId: 'campaign-1', code: 'GENTE-005-0001' },
+        { campaignId: 'campaign-1', code: 'GENTE-010-0001' },
       ],
       skipDuplicates: true,
     });
     expect(tx.adminAuditLog.create).toHaveBeenCalledOnce();
+  });
+
+  it('rejeita lotes com nomenclatura de desconto inválida', async () => {
+    const prisma = prismaMock();
+    prisma.campaign.findFirst.mockResolvedValue({ id: 'campaign-1' });
+
+    await expect(
+      new AdminService(prisma).importCoupons({ codes: ['GENTE-DEV-001'] }),
+    ).rejects.toThrow(BadRequestException);
+    expect(prisma.$transaction).not.toHaveBeenCalled();
   });
 });

@@ -58,7 +58,7 @@ describe('SubmissionService', () => {
           findUnique: vi.fn().mockResolvedValue({
             id: 'submission-1',
             couponId: 'coupon-1',
-            coupon: { code: 'GENTE10' },
+            coupon: { code: 'GENTE-010-0001' },
           }),
         },
       }),
@@ -67,7 +67,7 @@ describe('SubmissionService', () => {
 
     await expect(service.create(validDto)).resolves.toEqual({
       submissionId: 'submission-1',
-      couponCode: 'GENTE10',
+      couponCode: 'GENTE-010-0001',
       isExisting: true,
       soldOut: false,
     });
@@ -124,11 +124,13 @@ describe('SubmissionService', () => {
   });
 
   it('deve reservar e atribuir um cupom em uma única transação', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.1);
     const prisma = createPrismaMock();
     const couponUpdate = vi.fn().mockResolvedValue({});
+    const queryRaw = vi.fn().mockResolvedValue([{ id: 'coupon-1' }]);
     const submissionCreate = vi.fn().mockResolvedValue({
       id: 'submission-1',
-      coupon: { code: 'GENTE10' },
+      coupon: { code: 'GENTE-010-0001' },
     });
     prisma.campaign.findFirst.mockResolvedValue({ id: 'campaign-1', questions: [] });
     prisma.$transaction.mockImplementation(async (callback: (tx: unknown) => unknown) =>
@@ -138,14 +140,14 @@ describe('SubmissionService', () => {
           create: submissionCreate,
         },
         coupon: { update: couponUpdate },
-        $queryRaw: vi.fn().mockResolvedValue([{ id: 'coupon-1' }]),
+        $queryRaw: queryRaw,
       }),
     );
     const service = new SubmissionService(prisma);
 
     await expect(service.create(validDto)).resolves.toEqual({
       submissionId: 'submission-1',
-      couponCode: 'GENTE10',
+      couponCode: 'GENTE-010-0001',
       isExisting: false,
       soldOut: false,
     });
@@ -153,6 +155,37 @@ describe('SubmissionService', () => {
       expect.objectContaining({ where: { id: 'coupon-1' } }),
     );
     expect(submissionCreate).toHaveBeenCalledOnce();
+    expect(queryRaw.mock.calls[0][0].values).toEqual([
+      'campaign-1',
+      'GENTE-005-%',
+      'GENTE-010-%',
+      'GENTE-005-%',
+    ]);
+  });
+
+  it('sorteia 10% como primeira opção e mantém 5% como fallback', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.9);
+    const prisma = createPrismaMock();
+    const queryRaw = vi.fn().mockResolvedValue([]);
+    prisma.campaign.findFirst.mockResolvedValue({ id: 'campaign-1', questions: [] });
+    prisma.$transaction.mockImplementation(async (callback: (tx: unknown) => unknown) =>
+      callback({
+        submission: {
+          findUnique: vi.fn().mockResolvedValue(null),
+          create: vi.fn().mockResolvedValue({ id: 'submission-1' }),
+        },
+        $queryRaw: queryRaw,
+      }),
+    );
+
+    await new SubmissionService(prisma).create(validDto);
+
+    expect(queryRaw.mock.calls[0][0].values).toEqual([
+      'campaign-1',
+      'GENTE-010-%',
+      'GENTE-005-%',
+      'GENTE-010-%',
+    ]);
   });
 
   it('deve manter a entrega pendente quando o n8n não estiver configurado', async () => {
@@ -161,7 +194,7 @@ describe('SubmissionService', () => {
       id: 'submission-1',
       name: 'Ana Silva',
       phone: '+5581999998888',
-      coupon: { code: 'GENTE10' },
+      coupon: { code: 'GENTE-010-0001' },
       delivery: null,
     });
     prisma.deliveryRequest.upsert.mockResolvedValue({ id: 'delivery-1' });
@@ -174,6 +207,22 @@ describe('SubmissionService', () => {
     });
   });
 
+  it('deve rejeitar o envio de cupons legados sem percentual identificável', async () => {
+    const prisma = createPrismaMock();
+    prisma.submission.findUnique.mockResolvedValue({
+      id: 'submission-1',
+      name: 'Ana Silva',
+      phone: '+5581999998888',
+      coupon: { code: 'GENTE-DEV-001' },
+      delivery: null,
+    });
+
+    await expect(new SubmissionService(prisma).requestDelivery('submission-1')).rejects.toThrow(
+      BadRequestException,
+    );
+    expect(prisma.deliveryRequest.upsert).not.toHaveBeenCalled();
+  });
+
   it('deve marcar a entrega como DISPATCHED quando o n8n aceitar o webhook', async () => {
     vi.stubEnv('N8N_DELIVERY_WEBHOOK_URL', 'https://n8n.example.com/webhook/cupom-delivery');
     vi.stubEnv('N8N_SHARED_SECRET', 'segredo-compartilhado');
@@ -183,7 +232,7 @@ describe('SubmissionService', () => {
       id: 'submission-1',
       name: 'Ana Silva',
       phone: '+5581999998888',
-      coupon: { code: 'GENTE10' },
+      coupon: { code: 'GENTE-010-0001' },
       delivery: null,
     });
     prisma.deliveryRequest.upsert.mockResolvedValue({ id: 'delivery-1' });
@@ -195,6 +244,12 @@ describe('SubmissionService', () => {
       deliveryId: 'delivery-1',
       configured: true,
     });
+    expect(fetch).toHaveBeenCalledWith(
+      'https://n8n.example.com/webhook/cupom-delivery',
+      expect.objectContaining({
+        body: expect.stringContaining('"discountPercent":10'),
+      }),
+    );
   });
 
   it('deve registrar FAILED quando o webhook do n8n falhar', async () => {
@@ -206,7 +261,7 @@ describe('SubmissionService', () => {
       id: 'submission-1',
       name: 'Ana Silva',
       phone: '+5581999998888',
-      coupon: { code: 'GENTE10' },
+      coupon: { code: 'GENTE-005-0001' },
       delivery: null,
     });
     prisma.deliveryRequest.upsert.mockResolvedValue({ id: 'delivery-1' });

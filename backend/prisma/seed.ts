@@ -183,9 +183,14 @@ async function main() {
 
   // Cupons de teste só entram em ambientes não produtivos. Em produção os códigos
   // reais são carregados pelo painel admin (POST /api/admin/coupons/import), então
-  // a ausência da variável é o que impede um GENTE-DEV-* de chegar a um participante.
+  // a ausência da variável é o que impede cupons demonstrativos de chegarem a participantes.
   if (process.env.SEED_DEV_COUPONS === 'true') {
-    const codes = ['GENTE-DEV-001', 'GENTE-DEV-002', 'GENTE-DEV-003'];
+    const codes = [
+      'GENTE-005-DEV-001',
+      'GENTE-005-DEV-002',
+      'GENTE-010-DEV-001',
+      'GENTE-010-DEV-002',
+    ];
     await prisma.coupon.createMany({
       data: codes.map((code) => ({ campaignId: campaign.id, code })),
       skipDuplicates: true,

@@ -16,3 +16,5 @@ No n8n, a versão atual aparece como **CupomForm - Evolution + Google Sheets** e
 ## Estado validado em produção
 
 Em 02/08/2026, o workflow foi validado de ponta a ponta: webhook autenticado, envio `sendText` aceito pela Evolution, callback persistido como `SENT`, painel administrativo atualizado e abas `entregas`/`respostas` sincronizadas. No nó **Evolution API - enviar texto**, o corpo usa campos separados `number` e `text` para evitar erros de serialização de JSON.
+
+O backend envia `discountPercent`, derivado do segmento `005`/`010` do código. O workflow valida esse valor e o usa na mensagem do Hortifruti Moranguinho, junto com endereço, mapa, validade e regras; assim o percentual comunicado sempre corresponde ao cupom reservado.
