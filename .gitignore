@@ -56,3 +56,6 @@ capturas-telas
 *.key
 id_rsa
 id_ed25519
+
+# Private local documentation (briefings, architecture notes, and operational references)
+docs/
