@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Question } from "../types";
 
 type ChoiceFieldProps = {
@@ -5,6 +6,7 @@ type ChoiceFieldProps = {
   value: string;
   onChange: (value: string) => void;
   error?: string;
+  visibleCount?: number;
 };
 
 export function ChoiceField({
@@ -12,7 +14,23 @@ export function ChoiceField({
   value,
   onChange,
   error,
+  visibleCount,
 }: ChoiceFieldProps) {
+  const allOptions = question.options ?? [];
+  const collapsible = Boolean(visibleCount) && allOptions.length > visibleCount!;
+  const hiddenOptions = collapsible ? allOptions.slice(visibleCount!) : [];
+  const [expanded, setExpanded] = useState(!collapsible);
+
+  useEffect(() => {
+    if (collapsible && hiddenOptions.includes(value)) {
+      setExpanded(true);
+    }
+    // Only needs to react to the selected value moving into the hidden tail.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  const visibleOptions = collapsible && !expanded ? allOptions.slice(0, visibleCount) : allOptions;
+
   return (
     <fieldset className="space-y-3">
       <legend className="text-[13.5px] font-extrabold leading-5 text-[#1b1830]">
@@ -20,7 +38,7 @@ export function ChoiceField({
         {question.required && <span className="text-red-600"> *</span>}
       </legend>
       <div className="space-y-2.5">
-        {question.options?.map((option) => {
+        {visibleOptions.map((option) => {
           const selected = value === option;
           return (
             <button
@@ -49,6 +67,15 @@ export function ChoiceField({
             </button>
           );
         })}
+        {collapsible && !expanded && (
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="w-full rounded-[14px] border border-dashed border-[#c9c5dc] py-2.5 text-[13px] font-extrabold text-[#4338ca] transition-colors hover:bg-[#faf9fe]"
+          >
+            + Mais bairros
+          </button>
+        )}
       </div>
       {error && (
         <p role="alert" className="text-[12.5px] font-bold text-red-600">

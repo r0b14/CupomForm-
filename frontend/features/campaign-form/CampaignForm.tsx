@@ -12,7 +12,6 @@ import {
 import { fetchCampaign, submitSubmission, requestDelivery } from "./api";
 import { previewCampaign } from "./preview-campaign";
 import {
-  isSoldOut,
   validateIdentityStep,
   validateConsentStep,
   validateQuestionsStep,
@@ -127,6 +126,7 @@ export function CampaignForm() {
         submissionId: "preview-local",
         couponCode: "GENTE10",
         isExisting: false,
+        soldOut: false,
       });
       setScreen("coupon");
       return;
@@ -141,17 +141,13 @@ export function CampaignForm() {
         consent,
       });
       setResult(res);
-      setScreen("coupon");
+      setScreen(res.soldOut ? "soldout" : "coupon");
     } catch (reason) {
       const message =
         reason instanceof Error
           ? reason.message
           : "Não foi possível gerar o cupom.";
-      if (isSoldOut(message)) {
-        setScreen("soldout");
-      } else {
-        setRequestError(message);
-      }
+      setRequestError(message);
     } finally {
       setSubmitting(false);
     }
@@ -210,9 +206,9 @@ export function CampaignForm() {
 
   return (
     <FormShell
-      campaign={campaign}
       step={step}
       totalSteps={totalSteps}
+      stepKind={isIdentityStep ? "identity" : isConsentStep ? "consent" : "questions"}
       previewMode={previewMode}
     >
       <form onSubmit={handleSubmit} className="flex min-h-[660px] flex-col">

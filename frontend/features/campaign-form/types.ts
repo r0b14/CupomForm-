@@ -1,7 +1,7 @@
 export type Question = {
   key: string;
   label: string;
-  type: "SINGLE_CHOICE" | "TEXT";
+  type: "SINGLE_CHOICE" | "TEXT" | "SCALE";
   required: boolean;
   options: string[] | null;
 };
@@ -16,8 +16,9 @@ export type Campaign = {
 
 export type Result = {
   submissionId: string;
-  couponCode: string;
+  couponCode: string | null;
   isExisting: boolean;
+  soldOut: boolean;
 };
 
 export type FieldErrors = Record<string, string>;

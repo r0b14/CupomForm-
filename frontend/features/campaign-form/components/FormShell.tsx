@@ -1,21 +1,38 @@
 import { ReactNode } from "react";
-import { Campaign } from "../types";
+
+export type StepKind = "identity" | "questions" | "consent";
 
 type FormShellProps = {
-  campaign: Campaign | null;
   step: number;
   totalSteps: number;
+  stepKind: StepKind;
   previewMode: boolean;
   children: ReactNode;
 };
 
+const STEP_COPY: Record<StepKind, { title: string; subtitle: string }> = {
+  identity: {
+    title: "Vamos te conhecer",
+    subtitle: "Seu nome e WhatsApp para liberar sua pesquisa e o seu cupom.",
+  },
+  questions: {
+    title: "Sobre você e seu bairro",
+    subtitle: "Suas respostas ajudam o projeto Gente Daqui a entender seu território.",
+  },
+  consent: {
+    title: "Quase lá",
+    subtitle: "Confirme para liberar seu cupom exclusivo.",
+  },
+};
+
 export function FormShell({
-  campaign,
   step,
   totalSteps,
+  stepKind,
   previewMode,
   children,
 }: FormShellProps) {
+  const copy = STEP_COPY[stepKind];
   return (
     <main className="min-h-screen bg-[linear-gradient(160deg,#2a2470_0%,#171545_55%,#0b0a1f_100%)] px-5 py-11 font-[family-name:var(--font-manrope)]">
       <section className="mx-auto w-full max-w-[390px] overflow-hidden rounded-3xl bg-white shadow-[0_24px_60px_rgba(10,8,40,.35),0_4px_16px_rgba(10,8,40,.25)] transition-all">
@@ -32,11 +49,10 @@ export function FormShell({
             )}
           </div>
           <h1 className="mt-3.5 text-[22px] font-extrabold leading-tight text-[#1b1830]">
-            {campaign?.title || "Sua trajetória importa"}
+            {copy.title}
           </h1>
           <p className="mt-1.5 text-[14.5px] leading-[1.5] text-[#6b6785]">
-            {campaign?.subtitle ||
-              "Responda algumas perguntas sobre trabalho e território e ganhe um cupom para usar no comércio local."}
+            {copy.subtitle}
           </p>
           <div className="mt-[18px]">
             <div className="flex gap-1.5">

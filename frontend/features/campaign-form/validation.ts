@@ -1,14 +1,10 @@
 import { Question, FieldErrors } from "./types";
 import { cleanPhone } from "./formatters";
 
-export function isSoldOut(message: string): boolean {
-  return /esgotaram|esgotado/i.test(message);
-}
-
 export function validateIdentityStep(name: string, phone: string): FieldErrors {
   const errors: FieldErrors = {};
-  if (name.trim().length < 2) {
-    errors.name = "Digite seu nome para continuar.";
+  if (name.trim().length < 8) {
+    errors.name = "Digite seu nome completo (mínimo 8 caracteres).";
   }
   if (cleanPhone(phone).length < 10) {
     errors.phone = "Informe um WhatsApp válido com DDD.";

@@ -50,9 +50,20 @@ export const previewCampaign: Campaign = {
     {
       key: "bairro",
       label: "Em qual bairro ou território você mora?",
-      type: "TEXT",
+      type: "SINGLE_CHOICE",
       required: true,
-      options: null,
+      options: [
+        "Joana Bezerra (Coque)",
+        "Afogados",
+        "Madalena",
+        "San Martin",
+        "Mangueira",
+        "Jiquiá",
+        "Torre",
+        "São José",
+        "Santo Amaro",
+        "Outro",
+      ],
     },
     {
       key: "lideranca",
@@ -77,6 +88,14 @@ export const previewCampaign: Campaign = {
         "Talvez, quero saber mais",
         "Agora não tenho interesse",
       ],
+    },
+    {
+      key: "confianca_programa",
+      label:
+        "Quanto você confiaria em um programa que te conecta com alguém do seu bairro para ajudar nos próximos passos?",
+      type: "SCALE",
+      required: true,
+      options: ["1 - Nada", "2", "3", "4", "5 - Muita confiança"],
     },
   ],
 };
