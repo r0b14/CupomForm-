@@ -43,7 +43,18 @@ async function main() {
       label: 'Em qual bairro você mora?',
       type: QuestionType.SINGLE_CHOICE,
       required: true,
-      options: ['Joana Bezerra', 'San Martin', 'Mangueira', 'Jiquiá', 'Madalena', 'Torre', 'São José', 'Santo Amaro', 'Outro'],
+      options: [
+        'Joana Bezerra (Coque)',
+        'Afogados',
+        'Madalena',
+        'San Martin',
+        'Mangueira',
+        'Jiquiá',
+        'Torre',
+        'São José',
+        'Santo Amaro',
+        'Outro',
+      ],
       position: 2,
     },
     {
@@ -108,7 +119,7 @@ async function main() {
     {
       key: 'confianca_programa',
       label: 'Quanto você confiaria em um programa que te conecta com alguém do seu bairro para ajudar nos próximos passos?',
-      type: QuestionType.SINGLE_CHOICE,
+      type: QuestionType.SCALE,
       required: true,
       options: ['1 - Nada', '2', '3', '4', '5 - Muita confiança'],
       position: 8,
@@ -116,7 +127,7 @@ async function main() {
     {
       key: 'sentido_para_vida',
       label: 'Quanto a ideia do Gente Daqui faz sentido para sua vida?',
-      type: QuestionType.SINGLE_CHOICE,
+      type: QuestionType.SCALE,
       required: true,
       options: ['1 - Nada a ver', '2', '3', '4', '5 - Faz muito sentido'],
       position: 9,

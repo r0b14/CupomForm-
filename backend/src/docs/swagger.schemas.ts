@@ -18,8 +18,8 @@ export class QuestionResponseDto {
   @ApiProperty({ example: 'Qual produto mais chama sua atenção?' })
   label!: string;
 
-  @ApiProperty({ enum: ['SINGLE_CHOICE', 'TEXT'], example: 'SINGLE_CHOICE' })
-  type!: 'SINGLE_CHOICE' | 'TEXT';
+  @ApiProperty({ enum: ['SINGLE_CHOICE', 'TEXT', 'SCALE'], example: 'SINGLE_CHOICE' })
+  type!: 'SINGLE_CHOICE' | 'TEXT' | 'SCALE';
 
   @ApiProperty({ example: true })
   required!: boolean;
@@ -49,11 +49,14 @@ export class SubmissionResponseDto {
   @ApiProperty({ example: 'cmc4v3vjb0001l5082nq2r9eg' })
   submissionId!: string;
 
-  @ApiProperty({ example: 'GENTE10' })
-  couponCode!: string;
+  @ApiPropertyOptional({ example: 'GENTE10', description: 'Nulo quando os cupons da campanha se esgotaram.' })
+  couponCode!: string | null;
 
   @ApiProperty({ example: false, description: 'Indica que o telefone já possuía um cupom nesta campanha.' })
   isExisting!: boolean;
+
+  @ApiProperty({ example: false, description: 'Indica que a resposta foi salva, mas os cupons já haviam esgotado.' })
+  soldOut!: boolean;
 }
 
 export class DeliveryRequestResponseDto {

@@ -11,6 +11,7 @@ datasource db {
 enum QuestionType {
   SINGLE_CHOICE
   TEXT
+  SCALE
 }
 
 enum CouponStatus {
@@ -77,9 +78,9 @@ model Submission {
   consentAt   DateTime
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
-  couponId    String            @unique
+  couponId    String?           @unique
   campaign    Campaign          @relation(fields: [campaignId], references: [id], onDelete: Restrict)
-  coupon      Coupon            @relation(fields: [couponId], references: [id], onDelete: Restrict)
+  coupon      Coupon?           @relation(fields: [couponId], references: [id], onDelete: Restrict)
   delivery    DeliveryRequest?
 
   @@unique([campaignId, phone])

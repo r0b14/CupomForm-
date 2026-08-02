@@ -55,7 +55,11 @@ describe('SubmissionService', () => {
     prisma.$transaction.mockImplementation(async (callback: (tx: unknown) => unknown) =>
       callback({
         submission: {
-          findUnique: vi.fn().mockResolvedValue({ id: 'submission-1', coupon: { code: 'GENTE10' } }),
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'submission-1',
+            couponId: 'coupon-1',
+            coupon: { code: 'GENTE10' },
+          }),
         },
       }),
     );
@@ -65,21 +69,58 @@ describe('SubmissionService', () => {
       submissionId: 'submission-1',
       couponCode: 'GENTE10',
       isExisting: true,
+      soldOut: false,
     });
   });
 
-  it('deve rejeitar a emissão quando o estoque terminar', async () => {
+  it('deve devolver a resposta existente sem cupom quando o telefone já se cadastrou num período esgotado', async () => {
     const prisma = createPrismaMock();
     prisma.campaign.findFirst.mockResolvedValue({ id: 'campaign-1', questions: [] });
     prisma.$transaction.mockImplementation(async (callback: (tx: unknown) => unknown) =>
       callback({
-        submission: { findUnique: vi.fn().mockResolvedValue(null) },
+        submission: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'submission-1',
+            couponId: null,
+            coupon: null,
+          }),
+        },
+      }),
+    );
+    const service = new SubmissionService(prisma);
+
+    await expect(service.create(validDto)).resolves.toEqual({
+      submissionId: 'submission-1',
+      couponCode: null,
+      isExisting: true,
+      soldOut: true,
+    });
+  });
+
+  it('deve salvar a resposta sem cupom quando o estoque terminar', async () => {
+    const prisma = createPrismaMock();
+    const submissionCreate = vi.fn().mockResolvedValue({ id: 'submission-1' });
+    prisma.campaign.findFirst.mockResolvedValue({ id: 'campaign-1', questions: [] });
+    prisma.$transaction.mockImplementation(async (callback: (tx: unknown) => unknown) =>
+      callback({
+        submission: { findUnique: vi.fn().mockResolvedValue(null), create: submissionCreate },
         $queryRaw: vi.fn().mockResolvedValue([]),
       }),
     );
     const service = new SubmissionService(prisma);
 
-    await expect(service.create(validDto)).rejects.toThrow('Os cupons desta campanha se esgotaram.');
+    await expect(service.create(validDto)).resolves.toEqual({
+      submissionId: 'submission-1',
+      couponCode: null,
+      isExisting: false,
+      soldOut: true,
+    });
+    expect(submissionCreate).toHaveBeenCalledOnce();
+    expect(submissionCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({ couponId: expect.anything() }),
+      }),
+    );
   });
 
   it('deve reservar e atribuir um cupom em uma única transação', async () => {
@@ -106,6 +147,7 @@ describe('SubmissionService', () => {
       submissionId: 'submission-1',
       couponCode: 'GENTE10',
       isExisting: false,
+      soldOut: false,
     });
     expect(couponUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: 'coupon-1' } }),

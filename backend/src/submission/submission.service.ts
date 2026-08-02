@@ -13,8 +13,9 @@ import { DeliveryStatusDto } from './dto/delivery-status.dto';
 
 type CreatedSubmission = {
   submissionId: string;
-  couponCode: string;
+  couponCode: string | null;
   isExisting: boolean;
+  soldOut: boolean;
 };
 
 @Injectable()
@@ -42,7 +43,12 @@ export class SubmissionService {
             include: { coupon: true },
           });
           if (existing) {
-            return { submissionId: existing.id, couponCode: existing.coupon.code, isExisting: true };
+            return {
+              submissionId: existing.id,
+              couponCode: existing.coupon?.code ?? null,
+              isExisting: true,
+              soldOut: existing.couponId === null,
+            };
           }
 
           const lockedCoupons = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
@@ -53,7 +59,19 @@ export class SubmissionService {
             LIMIT 1
           `);
           const coupon = lockedCoupons[0];
-          if (!coupon) throw new BadRequestException('Os cupons desta campanha se esgotaram.');
+          if (!coupon) {
+            // Coupons ran out: keep the research answers, just don't assign a coupon.
+            const submission = await tx.submission.create({
+              data: {
+                campaignId: campaign.id,
+                name,
+                phone,
+                answers,
+                consentAt: new Date(),
+              },
+            });
+            return { submissionId: submission.id, couponCode: null, isExisting: false, soldOut: true };
+          }
 
           await tx.coupon.update({
             where: { id: coupon.id },
@@ -70,7 +88,12 @@ export class SubmissionService {
             },
             include: { coupon: true },
           });
-          return { submissionId: submission.id, couponCode: submission.coupon.code, isExisting: false };
+          return {
+            submissionId: submission.id,
+            couponCode: submission.coupon?.code ?? null,
+            isExisting: false,
+            soldOut: false,
+          };
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
@@ -81,7 +104,14 @@ export class SubmissionService {
           where: { campaignId_phone: { campaignId: campaign.id, phone } },
           include: { coupon: true },
         });
-        if (existing) return { submissionId: existing.id, couponCode: existing.coupon.code, isExisting: true };
+        if (existing) {
+          return {
+            submissionId: existing.id,
+            couponCode: existing.coupon?.code ?? null,
+            isExisting: true,
+            soldOut: existing.couponId === null,
+          };
+        }
       }
       throw error;
     }
@@ -93,6 +123,7 @@ export class SubmissionService {
       include: { coupon: true, delivery: true },
     });
     if (!submission) throw new NotFoundException('Resposta não encontrada.');
+    if (!submission.coupon) throw new BadRequestException('Este cadastro não possui cupom para envio.');
 
     if (submission.delivery?.status === DeliveryStatus.SENT || submission.delivery?.status === DeliveryStatus.DISPATCHED) {
       return { status: submission.delivery.status, deliveryId: submission.delivery.id };
@@ -170,7 +201,7 @@ export class SubmissionService {
       if (question.required && !value) {
         throw new BadRequestException(`Responda: ${question.label}`);
       }
-      if (question.type === 'SINGLE_CHOICE' && value) {
+      if ((question.type === 'SINGLE_CHOICE' || question.type === 'SCALE') && value) {
         const options = Array.isArray(question.options) ? question.options : [];
         if (!options.some((option) => option === value)) {
           throw new BadRequestException(`A resposta para "${question.label}" não é válida.`);
