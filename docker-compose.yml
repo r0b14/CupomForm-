@@ -20,6 +20,8 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgresql://cupomform:cupomform@postgres:5432/cupomform?schema=public
+      # Libera os cupons GENTE-DEV-* do seed. Nunca definir em produção.
+      SEED_DEV_COUPONS: "true"
     depends_on:
       postgres:
         condition: service_healthy

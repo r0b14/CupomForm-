@@ -12,7 +12,9 @@ MVP de formulário de campanha: coleta respostas, reserva um cupom único por Wh
    docker compose exec api npm run prisma:seed -w @cupomform/backend
    ```
 
-   A migração é aplicada automaticamente na inicialização da API. O seed cria a campanha `gente-daqui`, suas 12 perguntas e três cupons `GENTE-DEV-*` de homologação.
+   A migração é aplicada automaticamente na inicialização da API. O seed cria a campanha `gente-daqui` e suas 12 perguntas.
+
+   Os três cupons de teste `GENTE-DEV-*` só são criados quando `SEED_DEV_COUPONS=true` — o `docker-compose.yml` já define isso no serviço `api`. **Nunca defina essa variável em produção:** a ausência dela é o que permite rodar o seed no ambiente real (para corrigir perguntas, por exemplo) sem injetar cupons falsos no estoque. Em produção, os códigos reais entram pelo painel `/admin`.
 
 4. Acesse `http://localhost:3000`; o painel fica em `http://localhost:3000/admin` e o n8n em `http://localhost:5678`.
 
@@ -73,7 +75,9 @@ Em Docker/Coolify, o caminho precisa existir dentro do container da API. Prefira
 
 ## Editar as perguntas da campanha sem quebrar nada
 
-As perguntas da campanha ativa (`gente-daqui`) são definidas em [backend/prisma/seed.ts](backend/prisma/seed.ts) e aplicadas com `npm run db:seed` (upsert idempotente por `key` — rodar de novo é seguro). Não edite perguntas direto no PostgreSQL nem no Google Sheets.
+As perguntas da campanha ativa (`gente-daqui`) são definidas em [backend/prisma/seed.ts](backend/prisma/seed.ts) e aplicadas com `npm run prisma:seed -w @cupomform/backend` (upsert idempotente por `key` — rodar de novo é seguro). Não edite perguntas direto no PostgreSQL nem no Google Sheets.
+
+> **Editar o seed não muda o ambiente publicado.** As perguntas vêm do banco, não do build: enquanto o seed não for executado no PostgreSQL daquele ambiente, o formulário continua exibindo a versão antiga — inclusive o `type`, que decide se a pergunta aparece como lista de opções ou como barra deslizante. Depois de fazer merge de uma mudança em `seed.ts`, rode o seed no ambiente correspondente e confirme com `curl -s https://api-cupom.r0b14.com/api/campaign`.
 
 Regras do schema (`backend/prisma/schema.prisma`) que precisam ser respeitadas:
 

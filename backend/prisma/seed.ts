@@ -181,11 +181,16 @@ async function main() {
     }
   });
 
-  const codes = ['GENTE-DEV-001', 'GENTE-DEV-002', 'GENTE-DEV-003'];
-  await prisma.coupon.createMany({
-    data: codes.map((code) => ({ campaignId: campaign.id, code })),
-    skipDuplicates: true,
-  });
+  // Cupons de teste só entram em ambientes não produtivos. Em produção os códigos
+  // reais são carregados pelo painel admin (POST /api/admin/coupons/import), então
+  // a ausência da variável é o que impede um GENTE-DEV-* de chegar a um participante.
+  if (process.env.SEED_DEV_COUPONS === 'true') {
+    const codes = ['GENTE-DEV-001', 'GENTE-DEV-002', 'GENTE-DEV-003'];
+    await prisma.coupon.createMany({
+      data: codes.map((code) => ({ campaignId: campaign.id, code })),
+      skipDuplicates: true,
+    });
+  }
 }
 
 main()

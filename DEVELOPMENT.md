@@ -38,6 +38,7 @@ Ao finalizar a entrega:
 ## Testes Locais do Frontend
 
 Para testar o formulário público sem depender do backend em execução:
+
 1. Inicie o ambiente de dev: `npm run dev -w @cupomform/frontend` (ou especificando uma porta: `npm run dev -w @cupomform/frontend -- -p 3005`).
 2. Acesse no navegador: `http://localhost:<porta>/?preview=1`.
 3. O parâmetro `?preview=1` carrega a campanha demonstrativa local, permitindo testar a digitação fluida do WhatsApp com máscara `(XX) XXXXX-XXXX` e a emissão do cupom `GENTE10`.
@@ -52,4 +53,5 @@ Correção crítica de produção nasce de `main` em `fix/<nome>`, volta para `m
 - Um ambiente de homologação duradouro deve ter PostgreSQL e credenciais próprios.
 - Enquanto `development` usar a infraestrutura de produção, não teste importação, alteração de campanha ou reenvio com dados descartáveis.
 - Migrações Prisma nunca são reescritas depois de aplicadas; sempre crie uma nova migração.
-
+- Migração e seed são passos distintos. `prisma:deploy` roda sozinho a cada boot do container, mas o seed **não**: se um PR alterou `backend/prisma/seed.ts` (texto, opções, `position` ou `type` de uma pergunta), rode `npm run prisma:seed -w @cupomform/backend` no ambiente depois do deploy, senão o formulário publicado continua servindo os dados antigos.
+- `SEED_DEV_COUPONS` só existe em ambientes locais/descartáveis. Sem ela, o seed não cria os cupons `GENTE-DEV-*` e é seguro rodar em produção.
