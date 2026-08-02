@@ -11,6 +11,7 @@ import {
 } from "./types";
 import { fetchCampaign, submitSubmission, requestDelivery } from "./api";
 import { previewCampaign } from "./preview-campaign";
+import { NEIGHBORHOOD_QUESTION_KEY } from "./constants";
 import {
   validateIdentityStep,
   validateConsentStep,
@@ -41,15 +42,24 @@ export function CampaignForm() {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [requestError, setRequestError] = useState("");
 
+  // O bairro é perguntado junto com nome e WhatsApp, então sai da paginação.
+  const neighborhoodQuestion = useMemo(
+    () =>
+      campaign?.questions.find(
+        (question) => question.key === NEIGHBORHOOD_QUESTION_KEY,
+      ) ?? null,
+    [campaign],
+  );
+
   const questionPages = useMemo(() => {
     if (!campaign) return [] as Question[][];
+    const paged = campaign.questions.filter(
+      (question) => question.key !== NEIGHBORHOOD_QUESTION_KEY,
+    );
     return Array.from(
-      { length: Math.ceil(campaign.questions.length / QUESTION_PAGE_SIZE) },
+      { length: Math.ceil(paged.length / QUESTION_PAGE_SIZE) },
       (_, index) =>
-        campaign.questions.slice(
-          index * QUESTION_PAGE_SIZE,
-          (index + 1) * QUESTION_PAGE_SIZE,
-        ),
+        paged.slice(index * QUESTION_PAGE_SIZE, (index + 1) * QUESTION_PAGE_SIZE),
     );
   }, [campaign]);
 
@@ -85,6 +95,10 @@ export function CampaignForm() {
     };
   }, []);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0 });
+  }, [step, screen]);
+
   function handleAnswerChange(key: string, value: string) {
     setAnswers((current) => ({ ...current, [key]: value }));
     setErrors((current) => ({ ...current, [key]: "" }));
@@ -93,7 +107,13 @@ export function CampaignForm() {
   function validateCurrentStep(): boolean {
     let nextErrors: FieldErrors = {};
     if (isIdentityStep) {
-      nextErrors = validateIdentityStep(name, phone);
+      nextErrors = {
+        ...validateIdentityStep(name, phone),
+        ...validateQuestionsStep(
+          neighborhoodQuestion ? [neighborhoodQuestion] : [],
+          answers,
+        ),
+      };
     } else if (isConsentStep) {
       nextErrors = validateConsentStep(consent);
     } else {
@@ -212,7 +232,7 @@ export function CampaignForm() {
       previewMode={previewMode}
     >
       <form onSubmit={handleSubmit} className="flex min-h-[660px] flex-col">
-        <div className="flex flex-1 flex-col gap-[22px] px-6 py-6">
+        <div key={step} className="flex flex-1 flex-col gap-[22px] px-6 py-6 animate-card-in">
           {isIdentityStep && (
             <IdentityStep
               name={name}
@@ -226,6 +246,17 @@ export function CampaignForm() {
                 setErrors((current) => ({ ...current, phone: "" }));
               }}
               errors={errors}
+              neighborhood={neighborhoodQuestion}
+              neighborhoodValue={
+                neighborhoodQuestion
+                  ? (answers[neighborhoodQuestion.key] ?? "")
+                  : ""
+              }
+              onNeighborhoodChange={(val) => {
+                if (neighborhoodQuestion) {
+                  handleAnswerChange(neighborhoodQuestion.key, val);
+                }
+              }}
             />
           )}
 

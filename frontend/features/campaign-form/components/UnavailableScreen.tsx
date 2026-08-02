@@ -5,7 +5,7 @@ type UnavailableScreenProps = {
 export function UnavailableScreen({ requestError }: UnavailableScreenProps) {
   return (
     <main className="grid min-h-screen place-items-center bg-[#0b0a1f] p-5 font-[family-name:var(--font-manrope)]">
-      <section className="w-full max-w-[390px] rounded-3xl bg-white p-8 text-center shadow-2xl">
+      <section className="w-full max-w-[390px] rounded-3xl bg-white p-8 text-center shadow-2xl animate-card-in">
         <div className="mx-auto grid size-14 place-items-center rounded-full bg-[#f1f0f8] text-2xl text-[#6b6785]">
           !
         </div>

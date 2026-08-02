@@ -13,11 +13,13 @@ type FormShellProps = {
 const STEP_COPY: Record<StepKind, { title: string; subtitle: string }> = {
   identity: {
     title: "Vamos te conhecer",
-    subtitle: "Seu nome e WhatsApp para liberar sua pesquisa e o seu cupom.",
+    subtitle:
+      "Seu nome, WhatsApp e bairro para liberar sua pesquisa e o seu cupom.",
   },
   questions: {
     title: "Sobre você e seu bairro",
-    subtitle: "Suas respostas ajudam o projeto Gente Daqui a entender seu território.",
+    subtitle:
+      "Suas respostas ajudam o projeto Gente Daqui a entender seu território.",
   },
   consent: {
     title: "Quase lá",
@@ -35,7 +37,7 @@ export function FormShell({
   const copy = STEP_COPY[stepKind];
   return (
     <main className="min-h-screen bg-[linear-gradient(160deg,#2a2470_0%,#171545_55%,#0b0a1f_100%)] px-5 py-11 font-[family-name:var(--font-manrope)]">
-      <section className="mx-auto w-full max-w-[390px] overflow-hidden rounded-3xl bg-white shadow-[0_24px_60px_rgba(10,8,40,.35),0_4px_16px_rgba(10,8,40,.25)] transition-all">
+      <section className="mx-auto w-full max-w-[390px] overflow-hidden rounded-3xl bg-white shadow-[0_24px_60px_rgba(10,8,40,.35),0_4px_16px_rgba(10,8,40,.25)] transition-all animate-card-in">
         <header className="border-b border-[#efeef7] bg-[linear-gradient(180deg,#f5f4fb_0%,#fff_100%)] px-6 pb-[18px] pt-7">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eceafc] px-3 py-1.5 text-xs font-extrabold tracking-[.02em] text-[#4338ca]">
@@ -74,7 +76,8 @@ export function FormShell({
         {children}
       </section>
       <p className="mx-auto mt-5 max-w-[390px] text-center text-xs leading-5 text-white/35">
-        CupomForm para o projeto Gente Daqui · conteúdo ilustrativo
+        CupomForm para o projeto Gente Daqui · Potencializando iniciativas
+        Locais
       </p>
     </main>
   );

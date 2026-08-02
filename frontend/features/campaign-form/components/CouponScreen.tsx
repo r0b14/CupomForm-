@@ -15,7 +15,7 @@ export function CouponScreen({
 }: CouponScreenProps) {
   return (
     <main className="min-h-screen bg-[linear-gradient(160deg,#2a2470_0%,#171545_55%,#0b0a1f_100%)] px-5 py-11 font-[family-name:var(--font-manrope)]">
-      <section className="mx-auto flex min-h-[660px] w-full max-w-[390px] flex-col rounded-3xl bg-white p-6 shadow-2xl transition-all">
+      <section className="mx-auto flex min-h-[660px] w-full max-w-[390px] flex-col rounded-3xl bg-white p-6 shadow-2xl transition-all animate-card-in">
         <div className="flex items-center justify-between">
           <div className="grid size-14 place-items-center rounded-full bg-[#ecf8f3] text-2xl font-bold text-[#059669] shadow-sm">
             ✓

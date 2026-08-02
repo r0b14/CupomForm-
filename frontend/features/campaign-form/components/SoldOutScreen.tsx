@@ -1,7 +1,7 @@
 export function SoldOutScreen() {
   return (
     <main className="grid min-h-screen place-items-center bg-[linear-gradient(160deg,#2a2470_0%,#171545_55%,#0b0a1f_100%)] p-5 font-[family-name:var(--font-manrope)]">
-      <section className="flex min-h-[620px] w-full max-w-[390px] flex-col items-center justify-center rounded-3xl bg-white px-7 text-center shadow-2xl">
+      <section className="flex min-h-[620px] w-full max-w-[390px] flex-col items-center justify-center rounded-3xl bg-white px-7 text-center shadow-2xl animate-card-in">
         <span className="grid size-16 place-items-center rounded-full bg-[#ecf8f3] text-2xl font-bold text-[#059669] shadow-sm">
           ✓
         </span>

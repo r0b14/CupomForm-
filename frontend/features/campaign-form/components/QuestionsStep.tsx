@@ -2,6 +2,10 @@ import { Question, FieldErrors } from "../types";
 import { ChoiceField } from "./ChoiceField";
 import { TextField } from "./TextField";
 import { ScaleField } from "./ScaleField";
+import {
+  NEIGHBORHOOD_QUESTION_KEY,
+  NEIGHBORHOOD_VISIBLE_COUNT,
+} from "../constants";
 
 type QuestionsStepProps = {
   questions: Question[];
@@ -26,7 +30,11 @@ export function QuestionsStep({
             value={answers[question.key] ?? ""}
             onChange={(value) => onAnswerChange(question.key, value)}
             error={errors[question.key]}
-            visibleCount={question.key === "bairro" ? 3 : undefined}
+            visibleCount={
+              question.key === NEIGHBORHOOD_QUESTION_KEY
+                ? NEIGHBORHOOD_VISIBLE_COUNT
+                : undefined
+            }
           />
         ) : question.type === "SCALE" ? (
           <ScaleField

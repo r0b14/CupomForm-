@@ -1,5 +1,7 @@
-import { FieldErrors } from "../types";
+import { FieldErrors, Question } from "../types";
 import { formatPhone } from "../formatters";
+import { ChoiceField } from "./ChoiceField";
+import { NEIGHBORHOOD_VISIBLE_COUNT } from "../constants";
 
 type IdentityStepProps = {
   name: string;
@@ -7,6 +9,9 @@ type IdentityStepProps = {
   onNameChange: (name: string) => void;
   onPhoneChange: (phone: string) => void;
   errors: FieldErrors;
+  neighborhood: Question | null;
+  neighborhoodValue: string;
+  onNeighborhoodChange: (value: string) => void;
 };
 
 export function IdentityStep({
@@ -15,6 +20,9 @@ export function IdentityStep({
   onNameChange,
   onPhoneChange,
   errors,
+  neighborhood,
+  neighborhoodValue,
+  onNeighborhoodChange,
 }: IdentityStepProps) {
   return (
     <>
@@ -59,6 +67,15 @@ export function IdentityStep({
           </span>
         )}
       </label>
+      {neighborhood && (
+        <ChoiceField
+          question={neighborhood}
+          value={neighborhoodValue}
+          onChange={onNeighborhoodChange}
+          error={errors[neighborhood.key]}
+          visibleCount={NEIGHBORHOOD_VISIBLE_COUNT}
+        />
+      )}
     </>
   );
 }
