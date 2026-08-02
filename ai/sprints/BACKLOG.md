@@ -4,10 +4,10 @@
 
 - [ ] Configurar dados reais da campanha, termo de privacidade e lote de cupons.
 - [ ] Validar API e emissão concorrente de cupom contra PostgreSQL real.
-- [ ] Configurar workflow n8n com Evolution API e Google Sheets.
+- [x] Concluir o workflow n8n: credencial Google configurada, Evolution + Sheets testados e workflow ativado.
 - [ ] Criar e aprovar design mobile no Stitch ou Claude Design.
 - [x] Implementar frontend final e verificar os estados locais de carregamento, formulário, cupom, falha e esgotado.
-- [ ] Finalizar publicação: Web/API/PostgreSQL concluídos; configurar n8n e testar URL pública de ponta a ponta.
+- [x] Finalizar publicação técnica de homologação: Web/API/PostgreSQL/n8n saudáveis e fluxo público validado de ponta a ponta.
 
 ## P1 — confiabilidade depois do lançamento
 

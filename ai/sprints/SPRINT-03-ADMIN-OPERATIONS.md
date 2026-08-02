@@ -1,6 +1,6 @@
 # Sprint 03 — painel administrativo e operação segura
 
-**Status:** entregue em produção — painel, BFF, API administrativa e autenticação validados; ações operacionais mutáveis e integração WhatsApp permanecem no aceite E2E.
+**Status:** entregue em produção — painel, BFF, API administrativa, autenticação e integração WhatsApp/Sheets validados de ponta a ponta.
 
 **Objetivo:** permitir a operação segura da campanha por uma área administrativa, sem alterar os contratos públicos de emissão de cupons.
 
@@ -12,6 +12,8 @@
 4. **Estrutura administrativa de backend:** API protegida por Bearer token, auditoria, consultas operacionais, importação de códigos, atualização de campanha e reenvio foram adicionados.
 5. **Integração segura:** o Gemini substituiu os dados demonstrativos por um BFF Next.js com login, cookie assinado e allowlist de rotas; os segredos permanecem somente no servidor.
 6. **Publicação e aceite:** API no commit `89fd40e` e frontend no commit `aa4c0c0` foram publicados no Coolify e ficaram saudáveis. Login e dashboard com dados reais foram validados em produção.
+7. **Orquestração operacional:** workflow `CupomFormDelivery01` foi importado no n8n com envio pela Evolution e espelho periódico no Google Sheets; variáveis, segredos e credencial Google foram configurados e o workflow foi ativado.
+8. **Aceite E2E — 02/08/2026:** envio controlado chegou ao WhatsApp, callback marcou a entrega como `SENT`, o painel exibiu **Enviado** e as abas `entregas`/`respostas` foram sincronizadas.
 
 ## Entregas registradas
 
@@ -43,7 +45,7 @@
 - [x] Substituir os dados demonstrativos por respostas, cupons e entregas reais.
 - [ ] Testar importação de lote, alteração de campanha e reenvio com dados de homologação.
 - [ ] Definir política de rotação/revogação do token e responsáveis pelo acesso administrativo.
-- [ ] Executar aceite E2E: emissão, entrega WhatsApp, callback n8n e visualização no painel.
+- [x] Executar aceite E2E: emissão, entrega WhatsApp, callback n8n e visualização no painel.
 
 ## Contrato administrativo atual
 
@@ -74,6 +76,8 @@ Todos os endpoints exigem `Authorization: Bearer <ADMIN_API_TOKEN>`:
 - Frontend: commit `aa4c0c0`, container saudável em `127.0.0.1:3000/`.
 - Consulta autenticada retornou campanha `gente-daqui`, 1 submissão, 2 cupons disponíveis, 1 atribuído e 1 entrega com falha.
 - Login do painel, carregamento dos dados reais e sessão administrativa foram confirmados pelo responsável.
+- Workflow n8n ativo, Evolution conectada, entrega real recebida e mudança para `SENT` confirmada no painel em 02/08/2026.
+- Google Sheets validado como espelho operacional, com atualização idempotente por `submission_id`.
 - Segredos reais não foram registrados em logs, documentos ou commits.
 
 ## Configuração de infraestrutura

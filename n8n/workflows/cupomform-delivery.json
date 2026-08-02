@@ -1,5 +1,6 @@
 {
-  "name": "CupomForm - Entrega de cupom",
+  "id": "CupomFormDelivery01",
+  "name": "CupomForm - Evolution + Google Sheets",
   "nodes": [
     {
       "parameters": {
@@ -53,8 +54,41 @@
     },
     {
       "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "payload-valid-01",
+              "leftValue": "={{ ($json.body?.deliveryId && $json.body?.submissionId && $json.body?.couponCode && $json.body?.name && $json.body?.phone) ? 'valid' : 'invalid' }}",
+              "rightValue": "valid",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b67b1ec0-8c6d-4f0d-a67a-1bb0207a0030",
+      "name": "Validar payload",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -410,
+        170
+      ]
+    },
+    {
+      "parameters": {
         "respondWith": "json",
-        "responseBody": "={\\\"accepted\\\":true}",
+        "responseBody": "{\"accepted\":true}",
         "options": {
           "responseCode": 200
         }
@@ -64,14 +98,14 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        -360,
-        80
+        -160,
+        70
       ]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\\\"accepted\\\":false,\\\"message\\\":\\\"Unauthorized\\\"}",
+        "responseBody": "{\"accepted\":false,\"message\":\"Unauthorized\"}",
         "options": {
           "responseCode": 401
         }
@@ -83,6 +117,23 @@
       "position": [
         -360,
         300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"accepted\":false,\"message\":\"Invalid delivery payload\"}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "d87b1ec0-8c6d-4f0d-a67a-1bb0207a0031",
+      "name": "Responder payload inválido",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -160,
+        310
       ]
     },
     {
@@ -134,7 +185,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -340,
+        -140,
         170
       ]
     },
@@ -153,8 +204,19 @@
         },
         "sendBody": true,
         "contentType": "json",
-        "specifyBody": "json",
-        "jsonBody": "={\\n  \\\"number\\\": \\\"{{ $json.phone }}\\\",\\n  \\\"text\\\": \\\"{{ $json.message }}\\\"\\n}",
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.message }}"
+            }
+          ]
+        },
         "options": {}
       },
       "id": "f97b1ec0-8c6d-4f0d-a67a-1bb0207a0012",
@@ -162,7 +224,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -100,
+        100,
         170
       ],
       "continueOnFail": true
@@ -234,7 +296,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        140,
+        340,
         170
       ]
     },
@@ -262,10 +324,13 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        390,
+        590,
         170
       ],
-      "continueOnFail": true
+      "continueOnFail": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
       "parameters": {
@@ -315,9 +380,180 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.6,
       "position": [
-        650,
+        850,
         170
       ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "3d1e1ec0-8c6d-4f0d-a67a-1bb0207a0025",
+      "name": "Sincronizar a cada 5 minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -860,
+        560
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "4e2f1ec0-8c6d-4f0d-a67a-1bb0207a0026",
+      "name": "Sincronizar agora",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.CUPOMFORM_API_URL }}/api/admin/participants",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.ADMIN_API_TOKEN }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5f3a1ec0-8c6d-4f0d-a67a-1bb0207a0027",
+      "name": "CupomForm - listar submissões",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -590,
+        630
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "sync-01", "name": "submission_id", "value": "={{ $json.id }}", "type": "string" },
+            { "id": "sync-02", "name": "name", "value": "={{ $json.name }}", "type": "string" },
+            { "id": "sync-03", "name": "phone", "value": "={{ $json.phone }}", "type": "string" },
+            { "id": "sync-04", "name": "created_at", "value": "={{ $json.createdAt }}", "type": "string" },
+            { "id": "sync-05", "name": "coupon_code", "value": "={{ $json.coupon?.code || '' }}", "type": "string" },
+            { "id": "sync-06", "name": "delivery_status", "value": "={{ $json.delivery?.status || '' }}", "type": "string" },
+            { "id": "sync-07", "name": "idade", "value": "={{ $json.answers?.idade || '' }}", "type": "string" },
+            { "id": "sync-08", "name": "bairro", "value": "={{ $json.answers?.bairro || '' }}", "type": "string" },
+            { "id": "sync-09", "name": "situacao_atual", "value": "={{ $json.answers?.situacao_atual || '' }}", "type": "string" },
+            { "id": "sync-10", "name": "oportunidade_recente", "value": "={{ $json.answers?.oportunidade_recente || '' }}", "type": "string" },
+            { "id": "sync-11", "name": "barreira", "value": "={{ $json.answers?.barreira || '' }}", "type": "string" },
+            { "id": "sync-12", "name": "mensageiro_confiavel", "value": "={{ $json.answers?.mensageiro_confiavel || '' }}", "type": "string" },
+            { "id": "sync-13", "name": "referencia_local", "value": "={{ $json.answers?.referencia_local || '' }}", "type": "string" },
+            { "id": "sync-14", "name": "confianca_programa", "value": "={{ $json.answers?.confianca_programa || '' }}", "type": "string" },
+            { "id": "sync-15", "name": "sentido_para_vida", "value": "={{ $json.answers?.sentido_para_vida || '' }}", "type": "string" },
+            { "id": "sync-16", "name": "participaria", "value": "={{ $json.answers?.participaria || '' }}", "type": "string" },
+            { "id": "sync-17", "name": "canal_acompanhamento", "value": "={{ $json.answers?.canal_acompanhamento || '' }}", "type": "string" },
+            { "id": "sync-18", "name": "motivo_desistencia", "value": "={{ $json.answers?.motivo_desistencia || '' }}", "type": "string" },
+            { "id": "sync-19", "name": "answers_json", "value": "={{ JSON.stringify($json.answers || {}) }}", "type": "string" },
+            { "id": "sync-20", "name": "synced_at", "value": "={{ $now.toISO() }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6a4b1ec0-8c6d-4f0d-a67a-1bb0207a0028",
+      "name": "Preparar espelho de respostas",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -340,
+        630
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.GOOGLE_SHEETS_DOCUMENT_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $env.GOOGLE_SHEETS_RESPONSES_SHEET_NAME }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "submission_id": "={{ $json.submission_id }}",
+            "name": "={{ $json.name }}",
+            "phone": "={{ $json.phone }}",
+            "created_at": "={{ $json.created_at }}",
+            "coupon_code": "={{ $json.coupon_code }}",
+            "delivery_status": "={{ $json.delivery_status }}",
+            "idade": "={{ $json.idade }}",
+            "bairro": "={{ $json.bairro }}",
+            "situacao_atual": "={{ $json.situacao_atual }}",
+            "oportunidade_recente": "={{ $json.oportunidade_recente }}",
+            "barreira": "={{ $json.barreira }}",
+            "mensageiro_confiavel": "={{ $json.mensageiro_confiavel }}",
+            "referencia_local": "={{ $json.referencia_local }}",
+            "confianca_programa": "={{ $json.confianca_programa }}",
+            "sentido_para_vida": "={{ $json.sentido_para_vida }}",
+            "participaria": "={{ $json.participaria }}",
+            "canal_acompanhamento": "={{ $json.canal_acompanhamento }}",
+            "motivo_desistencia": "={{ $json.motivo_desistencia }}",
+            "answers_json": "={{ $json.answers_json }}",
+            "synced_at": "={{ $json.synced_at }}"
+          },
+          "matchingColumns": ["submission_id"],
+          "schema": [
+            { "id": "submission_id", "displayName": "submission_id", "required": true, "defaultMatch": true, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "name", "displayName": "name", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "phone", "displayName": "phone", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "created_at", "displayName": "created_at", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "coupon_code", "displayName": "coupon_code", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "delivery_status", "displayName": "delivery_status", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "idade", "displayName": "idade", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "bairro", "displayName": "bairro", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "situacao_atual", "displayName": "situacao_atual", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "oportunidade_recente", "displayName": "oportunidade_recente", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "barreira", "displayName": "barreira", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "mensageiro_confiavel", "displayName": "mensageiro_confiavel", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "referencia_local", "displayName": "referencia_local", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "confianca_programa", "displayName": "confianca_programa", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "sentido_para_vida", "displayName": "sentido_para_vida", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "participaria", "displayName": "participaria", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "canal_acompanhamento", "displayName": "canal_acompanhamento", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "motivo_desistencia", "displayName": "motivo_desistencia", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "answers_json", "displayName": "answers_json", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false },
+            { "id": "synced_at", "displayName": "synced_at", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "type": "string", "removed": false }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7b5c1ec0-8c6d-4f0d-a67a-1bb0207a0029",
+      "name": "Google Sheets - espelho de respostas",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -80,
+        630
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     }
   ],
   "pinData": {},
@@ -327,11 +563,17 @@
     },
     "Validar segredo": {
       "main": [
+        [{ "node": "Validar payload", "type": "main", "index": 0 }],
+        [{ "node": "Responder não autorizado", "type": "main", "index": 0 }]
+      ]
+    },
+    "Validar payload": {
+      "main": [
         [
           { "node": "Responder aceito", "type": "main", "index": 0 },
           { "node": "Preparar envio", "type": "main", "index": 0 }
         ],
-        [{ "node": "Responder não autorizado", "type": "main", "index": 0 }]
+        [{ "node": "Responder payload inválido", "type": "main", "index": 0 }]
       ]
     },
     "Preparar envio": {
@@ -345,6 +587,18 @@
     },
     "Callback CupomForm": {
       "main": [[{ "node": "Google Sheets - auditoria", "type": "main", "index": 0 }]]
+    },
+    "Sincronizar a cada 5 minutos": {
+      "main": [[{ "node": "CupomForm - listar submissões", "type": "main", "index": 0 }]]
+    },
+    "Sincronizar agora": {
+      "main": [[{ "node": "CupomForm - listar submissões", "type": "main", "index": 0 }]]
+    },
+    "CupomForm - listar submissões": {
+      "main": [[{ "node": "Preparar espelho de respostas", "type": "main", "index": 0 }]]
+    },
+    "Preparar espelho de respostas": {
+      "main": [[{ "node": "Google Sheets - espelho de respostas", "type": "main", "index": 0 }]]
     }
   },
   "active": false,

@@ -63,6 +63,7 @@ N8N_HOST=n8n.seu-dominio.com
 N8N_PROTOCOL=https
 WEBHOOK_URL=https://n8n.seu-dominio.com/
 N8N_ENCRYPTION_KEY=<chave longa e persistente>
+N8N_BLOCK_ENV_ACCESS_IN_NODE=false
 ```
 
 ## 3. Ordem segura de publicação
@@ -115,5 +116,6 @@ Estas ações não devem ser delegadas nem registradas no Git, pois envolvem con
 - Campanha `gente-daqui`: seed aplicado com 12 perguntas e três cupons de homologação.
 - Frontend: `https://cupom.r0b14.com`, publicado e saudável.
 - Painel administrativo: `https://cupom.r0b14.com/admin`, integrado à API e validado com autenticação em produção.
-- n8n: `https://n8n.r0b14.com`, existente; workflow CupomForm ainda precisa ser importado/configurado.
-- Evolution API e Google Sheets: integração E2E ainda pendente.
+- n8n: `https://n8n.r0b14.com`, saudável; workflow `CupomFormDelivery01` ativo e validado de ponta a ponta.
+- Evolution API: URL, instância e chave configuradas no n8n; envio controlado aceito com ID do provedor e entrega confirmada no WhatsApp.
+- Google Sheets: credencial de serviço associada aos dois nós; abas `entregas` e `respostas` sincronizadas e validadas.

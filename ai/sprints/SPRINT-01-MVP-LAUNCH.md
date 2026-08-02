@@ -1,6 +1,6 @@
 # Sprint 01 — campanha MVP e lançamento
 
-**Status:** em andamento — PostgreSQL, API e frontend publicados; n8n/Evolution/Sheets e aceite E2E pendentes.
+**Status:** integração MVP aceita em produção — PostgreSQL, API, frontend, n8n, Evolution e Google Sheets publicados e validados; lote real, concorrência/estoque e aceite final por QR/celular permanecem pendentes.
 **Objetivo:** disponibilizar uma campanha real por QR Code com emissão única de cupom e envio opcional por WhatsApp.
 
 ## Escopo e aceite
@@ -29,7 +29,7 @@
 - [x] Contratos públicos revisados e preservados.
 - [x] Aplicar migração e seed no PostgreSQL de produção: concluído no Coolify; lote real ainda pendente.
 - [ ] Testar concorrência, repetição e estoque vazio contra banco real: bloqueado por PostgreSQL indisponível.
-- [ ] Configurar/testar n8n, Evolution API e Google Sheets: bloqueado por serviços, credenciais e webhooks ausentes.
+- [x] Configurar/testar n8n, Evolution API e Google Sheets: workflow único ativo, credencial Google associada e aceite E2E concluído.
 
 ### Hardening de backend e infraestrutura — 01/08/2026
 
@@ -46,7 +46,7 @@
 - [x] `npx tsc -p backend/tsconfig.json --noEmit`: aprovado.
 - [x] `prisma generate` e `prisma validate`: aprovados; a validação usou somente uma URL PostgreSQL sintática temporária.
 - [x] PostgreSQL 16, API e frontend provisionados no Coolify com health checks aprovados.
-- [ ] E2E de entrega real: depende da configuração do n8n, Evolution API e Google Sheets.
+- [x] E2E de entrega real concluído: webhook, Evolution, callback, painel e Google Sheets validados em produção.
 
 ### Evidências de produção — 01/08/2026
 
@@ -60,8 +60,13 @@
 - [x] Segredos reais mantidos apenas no Coolify; `.env.example` permanece sem credenciais.
 - [x] Kit SSH protegido pelo `.gitignore` e permissões locais restritas.
 - [x] Incidentes de deploy resolvidos: artefato Nest em `dist/main.js`; probes em `127.0.0.1`; Next standalone com `HOSTNAME=0.0.0.0`.
-- [ ] Workflow n8n importado e ativado.
-- [ ] Evolution API, callback da API e Google Sheets validados de ponta a ponta.
+- [x] Workflow n8n importado com ID fixo `CupomFormDelivery01`, entrega Evolution e espelho periódico de todas as respostas.
+- [x] Variáveis do workflow configuradas no Service Stack do n8n e verificadas no container sem expor os segredos.
+- [x] `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`, API pública, instância Evolution `vendas-editaldebolso` e abas `entregas`/`respostas` confirmadas no runtime.
+- [x] Segredos compartilhados, token administrativo, chave Evolution e ID da planilha confirmados por presença no runtime.
+- [x] Credencial Google selecionada nos dois nós, workflow testado e ativado.
+- [x] Evolution API, callback da API e Google Sheets validados de ponta a ponta em 02/08/2026.
+- [x] Corpo do envio Evolution configurado por campos `number`/`text`; respostas HTTP e callbacks `SENT`/`FAILED` refletidos no painel.
 - [ ] Cupons reais importados; o estoque atual é somente de homologação.
 
 ### Comandos
@@ -91,7 +96,7 @@
 
 - Variável pública permitida: somente `NEXT_PUBLIC_API_URL`.
 - Gemini pode alterar apenas `frontend/` e não pode criar persistência local/fingir entrega WhatsApp.
-- Pendente: lote real de cupons, n8n/Evolution/Sheets e teste E2E em ambiente público.
+- Pendente: lote real de cupons, testes de concorrência/estoque e aceite final em celular pelo QR Code.
 - Evidências: `npm run db:generate`, `prisma validate`, `npm test`, `npm run build` e `git diff --check` passaram.
 
 ## Etapa Gemini — design e frontend
@@ -124,11 +129,11 @@
 ## Checklist final de entrega
 
 - [ ] Dados de campanha e lote real conferidos.
-- [ ] Segredos configurados somente no Coolify/n8n.
+- [x] Segredos configurados somente no Coolify/n8n.
 - [x] `npm test` e builds de backend/frontend aprovados.
 - [x] Testes e build do backend aprovados localmente em 01/08/2026.
 - [ ] Formulário testado em celular físico.
 - [ ] Cupom único, repetição e estoque vazio testados.
-- [ ] WhatsApp e linha no Sheets confirmados.
+- [x] WhatsApp, callback no painel e linhas de auditoria/espelho no Sheets confirmados.
 - [ ] URL HTTPS testada pelo QR Code.
 - [x] Handoff e evidências preenchidos neste arquivo.
