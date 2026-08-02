@@ -71,6 +71,21 @@ $env:COUPON_CSV_PATH='C:\caminho\cupons.csv'; npm run db:import-coupons
 
 Em Docker/Coolify, o caminho precisa existir dentro do container da API. Prefira o painel para produção. Não execute novamente o seed para adicionar estoque, não insira diretamente no PostgreSQL e não edite o Google Sheets: o PostgreSQL é a fonte de verdade e a planilha é apenas um espelho operacional.
 
+## Editar as perguntas da campanha sem quebrar nada
+
+As perguntas da campanha ativa (`gente-daqui`) são definidas em [backend/prisma/seed.ts](backend/prisma/seed.ts) e aplicadas com `npm run db:seed` (upsert idempotente por `key` — rodar de novo é seguro). Não edite perguntas direto no PostgreSQL nem no Google Sheets.
+
+Regras do schema (`backend/prisma/schema.prisma`) que precisam ser respeitadas:
+
+- `key` e `position` são únicos por campanha. Reordenar perguntas é só trocar os números de `position` no array `questions` do seed; para adicionar uma pergunta nova, use uma `key` inédita e uma `position` livre.
+- `type` precisa ser um dos valores de `QuestionType`: `SINGLE_CHOICE` (múltipla escolha, exige `options` com a lista de alternativas), `TEXT` (resposta livre, `options` deve ser `null`/`Prisma.JsonNull`) ou `SCALE` (escala de 1 a 5 exibida como barra deslizante no formulário — reaproveita `options` com 5 strings, onde a primeira e a última podem ter um rótulo textual, ex. `"1 - Nada"` e `"5 - Muita confiança"`).
+- Para remover uma pergunta, tire-a do array `questions` do seed: o próprio seed apaga do banco quem não está mais na lista. As respostas já registradas continuam guardadas no histórico de cada participante, só saem da lista de perguntas ativas e dos relatórios do `/admin`.
+
+**Atenção ao `key`:** cada resposta é salva como um JSON livre, indexado pelo `key` da pergunta, dentro do registro de cada participante (`Submission.answers`). Isso tem duas consequências importantes:
+
+- **Renomear o `key` de uma pergunta existente não migra as respostas antigas.** Elas ficam guardadas sob a chave antiga e somem da distribuição em `/admin` → Respostas (que só lê pelo `key` atual das perguntas ativas). Se só o texto mudou, edite apenas o `label` e mantenha o `key`.
+- **Reaproveitar o `key` de uma pergunta removida para uma pergunta com sentido diferente mistura dados antigos e novos** na mesma distribuição. Prefira sempre uma `key` nova quando o que está sendo medido muda de fato.
+
 ## Deploy no Coolify
 
 Estado de homologação em 01/08/2026:
@@ -94,7 +109,7 @@ Estado de homologação em 01/08/2026:
 
 - Há validação de payload, normalização de telefone brasileiro, CORS restrito, rate limit, reserva transacional e endpoints internos protegidos por segredo.
 - O painel `/admin` usa um BFF Next.js, sessão em cookie `HttpOnly` e token Bearer disponível somente no servidor. Operações administrativas relevantes geram auditoria no PostgreSQL.
-- Um telefone recebe somente um cupom por campanha; novos envios mostram o código originalmente emitido.
+- Um telefone recebe somente um cupom por campanha (normalizado para o formato de WhatsApp com DDD + 9 dígitos, fechando a brecha de digitar o número com e sem o 9 do celular); novos envios mostram o código originalmente emitido. Se os cupons já tiverem esgotado no primeiro envio, a resposta é salva mesmo assim, sem cupom, e reenvios continuam retornando esse mesmo resultado.
 - A confirmação da Evolution significa solicitação/entrega ao provedor, não prova de titularidade do número. Isso exigiria OTP, fora deste MVP.
 - Não há geração de QR code nem construtor visual de formulário nesta versão.
 
