@@ -33,10 +33,15 @@ export function IdentityStep({
         <input
           value={name}
           onChange={(event) => onNameChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (/\d/.test(event.key)) event.preventDefault();
+          }}
           autoComplete="name"
           placeholder="Como podemos te chamar?"
           className={`h-[52px] rounded-[14px] border-[1.5px] px-4 text-base text-[#1b1830] placeholder:text-[#a29fc0] transition-colors focus:outline-none focus:ring-2 focus:ring-[#4338ca]/25 ${
-            errors.name ? "border-red-600" : "border-[#e7e5f0] hover:border-[#b7b1ef]"
+            errors.name
+              ? "border-red-600"
+              : "border-[#e7e5f0] hover:border-[#b7b1ef]"
           }`}
         />
         {errors.name && (
@@ -56,9 +61,11 @@ export function IdentityStep({
           inputMode="tel"
           autoComplete="tel"
           maxLength={15}
-          placeholder="(11) 91234-5678"
+          placeholder="(81) 98888-6666"
           className={`h-[52px] rounded-[14px] border-[1.5px] px-4 text-base text-[#1b1830] placeholder:text-[#a29fc0] transition-colors focus:outline-none focus:ring-2 focus:ring-[#4338ca]/25 ${
-            errors.phone ? "border-red-600" : "border-[#e7e5f0] hover:border-[#b7b1ef]"
+            errors.phone
+              ? "border-red-600"
+              : "border-[#e7e5f0] hover:border-[#b7b1ef]"
           }`}
         />
         {errors.phone && (

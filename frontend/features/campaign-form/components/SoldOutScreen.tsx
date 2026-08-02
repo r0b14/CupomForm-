@@ -9,10 +9,25 @@ export function SoldOutScreen() {
           Obrigado por participar!
         </h1>
         <p className="mt-3 max-w-[280px] text-sm leading-6 text-[#6b6785]">
-          Suas respostas foram registradas com sucesso. Os cupons desta rodada já
-          esgotaram, mas assim que surgir uma nova oportunidade você será avisado
-          pelo seu WhatsApp.
+          Suas respostas foram registradas com sucesso. Os cupons desta rodada
+          já esgotaram, mas assim que surgir uma nova oportunidade você será
+          avisado pelo seu WhatsApp.
         </p>
+        <p className="mt-3 max-w-[280px] text-sm leading-6 text-[#6b6785]">
+          Acompanhe as nossas redes sociais para ficar sabendo das próximas
+          oportunidades.
+        </p>
+        <a
+          href="https://www.instagram.com/gente_daqui0?igsh=MWtiN2RkenJiYjhidg=="
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            src="/images/promo_banner.webp"
+            alt="Promo Banner"
+            className="mt-3 rounded-2xl max-w-70"
+          />
+        </a>
       </section>
     </main>
   );

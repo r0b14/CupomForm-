@@ -11,7 +11,12 @@ function stripOrdinal(label: string): string {
   return label.replace(/^\d+\s*-\s*/, "");
 }
 
-export function ScaleField({ question, value, onChange, error }: ScaleFieldProps) {
+export function ScaleField({
+  question,
+  value,
+  onChange,
+  error,
+}: ScaleFieldProps) {
   const options = question.options ?? [];
   const total = options.length || 5;
   const selectedIndex = value ? options.indexOf(value) : -1;
@@ -46,12 +51,16 @@ export function ScaleField({ question, value, onChange, error }: ScaleFieldProps
           <span className="max-w-[38%]">{stripOrdinal(options[0] ?? "")}</span>
           <span
             className={`grid size-8 shrink-0 place-items-center rounded-full text-[13px] font-extrabold transition-colors ${
-              answered ? "bg-[#eceafc] text-[#4338ca]" : "bg-[#f1f0f8] text-[#a29fc0]"
+              answered
+                ? "bg-[#eceafc] text-[#4338ca]"
+                : "bg-[#f1f0f8] text-[#a29fc0]"
             }`}
           >
             {answered ? position : "?"}
           </span>
-          <span className="max-w-[38%] text-right">{stripOrdinal(options[total - 1] ?? "")}</span>
+          <span className="max-w-[38%] text-right">
+            {stripOrdinal(options[total - 1] ?? "")}
+          </span>
         </div>
       </div>
       {error && (
