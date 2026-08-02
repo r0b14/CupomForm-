@@ -11,6 +11,7 @@
 
 ## Regras do projeto
 
+- Use `development` como branch de integração. `main` recebe somente versões aprovadas por PR; consulte `DEVELOPMENT.md`.
 - Frontend: Next.js/Tailwind em `frontend/`, mantido pelo Gemini; API: NestJS/Prisma em `backend/`.
 - Toda mudança de API deve preservar validação de entrada, normalização de telefone e emissão atômica de cupom.
 - Execute `npm test` e `npm run build` após mudar código TypeScript.

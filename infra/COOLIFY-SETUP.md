@@ -74,6 +74,13 @@ N8N_ENCRYPTION_KEY=<chave longa e persistente>
 5. Configure Evolution e Google Sheets no n8n, importe e ative o workflow.
 6. Só então habilite a campanha e faça um envio com um número de teste autorizado.
 
+### Branches e ambientes
+
+- Produção deve acompanhar `main`.
+- Homologação deve acompanhar `development`, preferencialmente em outro recurso e domínio.
+- Durante a reta final de 01/08/2026, o recurso público do frontend foi ligado temporariamente a `development`; nessa janela, todo push deve passar por testes e build antes de ser enviado.
+- Depois do aceite, abra PR `development` → `main`, volte o Git Source de produção para `main` e faça redeploy do SHA do merge.
+
 ## 4. Conferência final
 
 - O formulário abre a campanha em produção.

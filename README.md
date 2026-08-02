@@ -97,3 +97,5 @@ O processo completo de implementação fica em [ai/sprints/README.md](ai/sprints
 ```powershell
 .\scripts\new-sprint.ps1 -Id '04' -Title 'Novo fluxo de campanha'
 ```
+
+O fluxo de branches, CI, homologação e promoção para produção está em [DEVELOPMENT.md](DEVELOPMENT.md). Durante a reta final, implemente em `development`, valide o deploy e promova para `main` somente por PR.
