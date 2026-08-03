@@ -201,16 +201,51 @@ export class SubmissionService {
     });
   }
 
-  private validateAnswers(questions: Question[], submitted: Record<string, string>): Record<string, string> {
+  private validateAnswers(
+    questions: Question[],
+    submitted: Record<string, string | string[]>,
+  ): Prisma.InputJsonObject {
     if (Array.isArray(submitted)) throw new BadRequestException('Respostas inválidas.');
     const knownKeys = new Set(questions.map((question) => question.key));
     if (Object.keys(submitted).some((key) => !knownKeys.has(key))) {
       throw new BadRequestException('O formulário contém uma pergunta inválida.');
     }
 
-    const sanitized: Record<string, string> = {};
+    const sanitized: Record<string, Prisma.InputJsonValue> = {};
     for (const question of questions) {
       const rawValue = submitted[question.key];
+
+      if (question.type === 'MULTIPLE_CHOICE') {
+        if (rawValue !== undefined && !Array.isArray(rawValue)) {
+          throw new BadRequestException(`A resposta para "${question.label}" deve ser uma lista.`);
+        }
+        if (rawValue?.some((value) => typeof value !== 'string')) {
+          throw new BadRequestException(`A resposta para "${question.label}" possui formato inválido.`);
+        }
+
+        const values = (rawValue ?? [])
+          .filter((value): value is string => typeof value === 'string')
+          .map((value) => value.trim())
+          .filter(Boolean);
+        const uniqueValues = [...new Set(values)];
+        const options = Array.isArray(question.options) ? question.options : [];
+        const maxSelections = question.maxSelections ?? options.length;
+
+        if (question.required && uniqueValues.length === 0) {
+          throw new BadRequestException(`Responda: ${question.label}`);
+        }
+        if (uniqueValues.length > maxSelections) {
+          throw new BadRequestException(
+            `Escolha no máximo ${maxSelections} opções em "${question.label}".`,
+          );
+        }
+        if (uniqueValues.some((value) => !options.includes(value))) {
+          throw new BadRequestException(`A resposta para "${question.label}" não é válida.`);
+        }
+        if (uniqueValues.length) sanitized[question.key] = uniqueValues;
+        continue;
+      }
+
       if (rawValue !== undefined && typeof rawValue !== 'string') {
         throw new BadRequestException('Uma resposta possui formato inválido.');
       }

@@ -1,4 +1,4 @@
-import { Campaign, Result } from "./types";
+import { Answers, Campaign, Result } from "./types";
 
 export const apiUrl =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
@@ -21,7 +21,7 @@ export async function fetchCampaign(): Promise<Campaign> {
 export async function submitSubmission(data: {
   name: string;
   phone: string;
-  answers: Record<string, string>;
+  answers: Answers;
   consent: boolean;
 }): Promise<Result> {
   const response = await fetch(`${apiUrl}/submissions`, {

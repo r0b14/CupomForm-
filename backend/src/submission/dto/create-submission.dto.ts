@@ -17,11 +17,13 @@ export class CreateSubmissionDto {
 
   @ApiProperty({
     type: 'object',
-    additionalProperties: { type: 'string' },
+    additionalProperties: {
+      oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
+    },
     example: { interesse: 'Ofertas', comentario: 'Quero saber mais.' },
   })
   @IsObject()
-  answers!: Record<string, string>;
+  answers!: Record<string, string | string[]>;
 
   @ApiProperty({ example: true, description: 'O envio só é aceito quando o consentimento é verdadeiro.' })
   @IsBoolean()

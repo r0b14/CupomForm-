@@ -1,10 +1,15 @@
 export type Question = {
   key: string;
   label: string;
-  type: "SINGLE_CHOICE" | "TEXT" | "SCALE";
+  type: "SINGLE_CHOICE" | "MULTIPLE_CHOICE" | "TEXT" | "SCALE";
   required: boolean;
   options: string[] | null;
+  maxSelections: number | null;
+  section: number;
 };
+
+export type AnswerValue = string | string[];
+export type Answers = Record<string, AnswerValue>;
 
 export type Campaign = {
   slug: string;

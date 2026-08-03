@@ -18,7 +18,7 @@ feat/* ou fix/* → development → main
 
 1. Atualize a base: `git switch development` e `git pull --ff-only`.
 2. Para uma mudança pequena e urgente, trabalhe em `development`; para algo arriscado, abra `feat/<nome>` a partir dela.
-3. Backend e infraestrutura são implementados pelo Codex. Mudanças em `frontend/` passam pela rota `frontend-implement` do Gemini.
+3. Backend, frontend e infraestrutura são implementados pelo Codex; use a rota `frontend-implement` apenas quando delegar o frontend a outro processo Codex.
 4. Antes de enviar, execute `npm test` e `npm run build`.
 5. Faça commit pequeno, envie a branch e aguarde o CI `Tests and builds`.
 6. Valide o deploy de homologação no Coolify: health checks, formulário público e `/admin`.

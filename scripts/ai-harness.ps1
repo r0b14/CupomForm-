@@ -7,7 +7,7 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$Prompt,
 
-  [ValidateSet('codex', 'gemini')]
+  [ValidateSet('codex')]
   [string]$Provider,
 
   [string]$Model,
@@ -67,11 +67,6 @@ try {
     if ($Model) { $arguments += @('--model', $Model) }
     $arguments += $fullPrompt
     & codex @arguments
-  } elseif ($route.provider -eq 'gemini') {
-    $approvalMode = if ($route.mode -eq 'read-only') { 'plan' } else { 'auto_edit' }
-    $arguments = @('--skip-trust', '--approval-mode', $approvalMode, '--prompt', $fullPrompt)
-    if ($Model) { $arguments += @('--model', $Model) }
-    & gemini @arguments
   } else {
     throw "Provedor não suportado: $($route.provider)"
   }

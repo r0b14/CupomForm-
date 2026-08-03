@@ -12,7 +12,7 @@ MVP de formulário de campanha: coleta respostas, reserva um cupom único por Wh
    docker compose exec api npm run prisma:seed -w @cupomform/backend
    ```
 
-   A migração é aplicada automaticamente na inicialização da API. O seed cria a campanha `gente-daqui` e suas 16 perguntas.
+   A migração é aplicada automaticamente na inicialização da API. O seed cria a campanha `gente-daqui` e suas 19 perguntas, organizadas em seções.
 
    Os quatro cupons de teste `GENTE-005-DEV-*` e `GENTE-010-DEV-*` só são criados quando `SEED_DEV_COUPONS=true` — o `docker-compose.yml` já define isso no serviço `api`. **Nunca defina essa variável em produção:** a ausência dela é o que permite rodar o seed no ambiente real (para corrigir perguntas, por exemplo) sem injetar cupons falsos no estoque. Em produção, os códigos reais entram pelo painel `/admin`.
 
@@ -85,7 +85,7 @@ As perguntas da campanha ativa (`gente-daqui`) são definidas em [backend/prisma
 Regras do schema (`backend/prisma/schema.prisma`) que precisam ser respeitadas:
 
 - `key` e `position` são únicos por campanha. Reordenar perguntas é só trocar os números de `position` no array `questions` do seed; para adicionar uma pergunta nova, use uma `key` inédita e uma `position` livre.
-- `type` precisa ser um dos valores de `QuestionType`: `SINGLE_CHOICE` (múltipla escolha, exige `options` com a lista de alternativas), `TEXT` (resposta livre, `options` deve ser `null`/`Prisma.JsonNull`) ou `SCALE` (escala de 1 a 5 exibida como barra deslizante no formulário — reaproveita `options` com 5 strings, onde a primeira e a última podem ter um rótulo textual, ex. `"1 - Nada"` e `"5 - Muita confiança"`).
+- `type` precisa ser um dos valores de `QuestionType`: `SINGLE_CHOICE` (uma alternativa), `MULTIPLE_CHOICE` (checkboxes com limite em `maxSelections`), `TEXT` (resposta livre) ou `SCALE` (escala exibida como barra deslizante). Perguntas são agrupadas no formulário pelo campo `section`.
 - Para remover uma pergunta, tire-a do array `questions` do seed: o próprio seed apaga do banco quem não está mais na lista. As respostas já registradas continuam guardadas no histórico de cada participante, só saem da lista de perguntas ativas e dos relatórios do `/admin`.
 
 **Atenção ao `key`:** cada resposta é salva como um JSON livre, indexado pelo `key` da pergunta, dentro do registro de cada participante (`Submission.answers`). Isso tem duas consequências importantes:
@@ -129,19 +129,18 @@ Estado de homologação em 01/08/2026:
 - A confirmação da Evolution significa solicitação/entrega ao provedor, não prova de titularidade do número. Isso exigiria OTP, fora deste MVP.
 - Não há geração de QR code nem construtor visual de formulário nesta versão.
 
-## Harness de IA com Codex e Gemini
+## Harness opcional do Codex
 
 O projeto inclui um roteador local de tarefas em [ai/routing.json](ai/routing.json). A meta é gastar pouco sem usar um modelo fraco para mudanças críticas:
 
 | Atividade | Agente padrão | Modo |
 | --- | --- | --- |
-| Explorar repositório, resumir logs/docs, planejar testes | Gemini | somente leitura |
-| Revisar um diff como segunda opinião | Gemini | somente leitura |
-| Implementar backend, depurar e rodar verificações | Codex | escrita no workspace |
-| Implementar toda a interface em `frontend/` | Gemini | escrita no workspace |
+| Explorar repositório, resumir logs/docs, planejar testes | Codex | somente leitura |
+| Revisar um diff como segunda opinião | Codex | somente leitura |
+| Implementar backend, frontend, depurar e rodar verificações | Codex | escrita no workspace |
 | Arquitetura e análise de segurança | Codex | somente leitura |
 
-1. O arquivo versionado `ai/models.example.json` já é a configuração ativa quando não existe `ai/models.local.json`: Gemini 3.5 executa leitura/revisão, Gemini 3.6 implementa o frontend, Codex Terra executa backend e Codex Sol fica restrito a arquitetura/segurança. Para substituir algum ID disponível na sua conta sem alterar o Git, copie-o para `ai/models.local.json` e altere somente o campo necessário.
+1. O arquivo versionado `ai/models.example.json` define os perfis Codex. Para substituir algum ID disponível na sua conta sem alterar o Git, copie-o para `ai/models.local.json` e altere somente o campo necessário.
 2. Faça uma prévia gratuita da rota:
 
    ```powershell
@@ -156,11 +155,11 @@ O projeto inclui um roteador local de tarefas em [ai/routing.json](ai/routing.js
    .\scripts\ai-harness.ps1 -Task frontend-implement -Prompt 'Implemente a tela a partir do design aprovado' -Run
    ```
 
-Rode Codex e Gemini separadamente, sempre nessa ordem: Codex entrega backend/contratos; Gemini entrega somente `frontend/`. O procedimento completo está em [ai/SEQUENTIAL_WORKFLOW.md](ai/SEQUENTIAL_WORKFLOW.md). Use `frontend-design` para preparar o briefing no Stitch ou Claude Design e `frontend-implement` para o Gemini implementar a interface conforme [frontend/FRONTEND_PROMPT.md](frontend/FRONTEND_PROMPT.md). Use `review` depois de uma implementação importante e `security` antes de alterações em autenticação, LGPD, pagamentos ou integração com a Evolution API. As regras compartilhadas estão em [AGENTS.md](AGENTS.md); o script as inclui no prompt dos dois CLIs.
+O Codex pode executar todo o ciclo, inclusive `frontend-design` e `frontend-implement`. O procedimento está em [ai/SEQUENTIAL_WORKFLOW.md](ai/SEQUENTIAL_WORKFLOW.md). Use `review` depois de uma implementação importante e `security` antes de alterações em autenticação, LGPD, pagamentos ou integração com a Evolution API. As regras compartilhadas estão em [AGENTS.md](AGENTS.md).
 
 ## Sprints e entregas
 
-O processo completo de implementação fica em [ai/sprints/README.md](ai/sprints/README.md): backlog priorizado, sprints 00–03, checklist de entrega, templates e handoff Codex→Gemini. Para abrir uma próxima sprint:
+O processo completo de implementação fica em [ai/sprints/README.md](ai/sprints/README.md): backlog priorizado, checklist de entrega e templates Codex. Para abrir uma próxima sprint:
 
 ```powershell
 .\scripts\new-sprint.ps1 -Id '04' -Title 'Novo fluxo de campanha'

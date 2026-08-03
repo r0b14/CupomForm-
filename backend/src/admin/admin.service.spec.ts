@@ -39,11 +39,20 @@ describe('AdminService', () => {
         required: false,
         options: null,
       },
+      {
+        key: 'areas',
+        label: 'Quais áreas?',
+        type: 'MULTIPLE_CHOICE',
+        required: true,
+        options: ['Tecnologia', 'Vendas', 'Logística'],
+        maxSelections: 2,
+        section: 3,
+      },
     ]);
     prisma.submission.findMany.mockResolvedValue([
-      { answers: { bairro: 'Torre', confianca: '5 - Muita', motivo: 'gostei' } },
-      { answers: { bairro: 'Torre', confianca: '1 - Nada' } },
-      { answers: { bairro: 'Madalena', confianca: '3' } },
+      { answers: { bairro: 'Torre', confianca: '5 - Muita', motivo: 'gostei', areas: ['Tecnologia', 'Logística'] } },
+      { answers: { bairro: 'Torre', confianca: '1 - Nada', areas: ['Tecnologia'] } },
+      { answers: { bairro: 'Madalena', confianca: '3', areas: ['Vendas'] } },
       { answers: {} },
     ]);
     return prisma;
@@ -87,6 +96,27 @@ describe('AdminService', () => {
     const { distribution } = (await new AdminService(prisma).responses()).questions[0];
     const legado = distribution.find((item) => item.value === 'Joana Bezerra');
     expect(legado).toEqual({ value: 'Joana Bezerra', count: 1, percentage: 50, inOptions: false });
+  });
+
+  it('agrega cada alternativa de múltipla escolha sem inflar participantes respondentes', async () => {
+    const result = await new AdminService(responsesPrisma()).responses();
+    const areas = result.questions.find((question) => question.key === 'areas');
+
+    expect(areas?.answered).toBe(3);
+    expect(areas?.distribution).toEqual([
+      { value: 'Tecnologia', count: 2, percentage: 50, inOptions: true },
+      { value: 'Vendas', count: 1, percentage: 25, inOptions: true },
+      { value: 'Logística', count: 1, percentage: 25, inOptions: true },
+    ]);
+  });
+
+  it('filtra múltipla escolha quando qualquer alternativa aceita estiver presente', async () => {
+    const result = await new AdminService(responsesPrisma()).responses(
+      JSON.stringify({ areas: ['Logística'] }),
+    );
+
+    expect(result.filtered).toBe(1);
+    expect(result.filters).toEqual({ areas: ['Logística'] });
   });
 
   it('recorta a base pelos filtros e recalcula as demais perguntas', async () => {

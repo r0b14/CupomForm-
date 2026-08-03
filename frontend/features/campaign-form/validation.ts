@@ -1,4 +1,4 @@
-import { Question, FieldErrors } from "./types";
+import { Answers, Question, FieldErrors } from "./types";
 import { cleanPhone } from "./formatters";
 
 export function validateIdentityStep(name: string, phone: string): FieldErrors {
@@ -22,12 +22,22 @@ export function validateConsentStep(consent: boolean): FieldErrors {
 
 export function validateQuestionsStep(
   questions: Question[],
-  answers: Record<string, string>
+  answers: Answers
 ): FieldErrors {
   const errors: FieldErrors = {};
   for (const question of questions) {
-    if (question.required && !answers[question.key]?.trim()) {
+    const answer = answers[question.key];
+    const empty = Array.isArray(answer) ? answer.length === 0 : !answer?.trim();
+    if (question.required && empty) {
       errors[question.key] = "Escolha uma opção para continuar.";
+    }
+    if (
+      question.type === "MULTIPLE_CHOICE" &&
+      Array.isArray(answer) &&
+      question.maxSelections !== null &&
+      answer.length > question.maxSelections
+    ) {
+      errors[question.key] = `Escolha no máximo ${question.maxSelections} opções.`;
     }
   }
   return errors;

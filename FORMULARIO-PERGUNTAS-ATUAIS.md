@@ -63,7 +63,9 @@ Antes das perguntas, o formulário solicita:
 - É longe da minha residência ou difícil de chegar;
 - Não sabia que existia;
 
-### 6. Se você tivesse acesso a um programa que te conectasse com pessoas do seu bairro que já passaram por processos semelhantes ao que você deseja, qual seria o principal motivo para participar?
+### 6. O que você mais gostaria de conquistar com um programa de apoio profissional no seu bairro?
+
+_Marque até 3 alternativas._
 
 - Conseguir um emprego formal;
 - Conseguir um emprego informal;
@@ -75,7 +77,7 @@ Antes das perguntas, o formulário solicita:
 
 ### 7. Qual dessas áreas você teria mais vontade de aprender ou trabalhar?
 
-_Tipo: múltipla escolha_
+_Marque até 2 alternativas._
 
 - Programação, dados ou inteligência artificial
 - Suporte técnico e atendimento ao cliente (telefone, chat ou presencial)
@@ -117,7 +119,15 @@ _Tipo: múltipla escolha, escolha única. Obrigatória._
 
 Resposta livre e opcional.
 
-### 12. Quanto você confiaria em um programa que te conecta com alguém do seu bairro para ajudar nos próximos passos profissionais?
+### 12. Quando você pensa em buscar uma oportunidade profissional, quem mais influencia sua decisão?
+
+- Minha família;
+- Amigos ou pessoas do bairro;
+- Professores ou pessoas da escola ou faculdade;
+- Pessoas que já trabalham na área;
+- Costumo decidir sozinho.
+
+### 13. Quanto você confiaria em um programa que te conecta com alguém do seu bairro para ajudar nos próximos passos profissionais?
 
 - 1 — Nada;
 - 2;
@@ -135,7 +145,7 @@ O Gente Daqui é uma proposta para aproximar jovens do bairro de oportunidades r
 - Indicar cursos, vagas, seleções e outras oportunidades gratuitas ou acessíveis;
 - Oferecer acompanhamento no seu ritmo, pelo celular ou presencialmente, para que você não precise fazer esse caminho sozinho.
 
-### 13. Quanto a ideia do Gente Daqui faz sentido para sua vida?
+### 14. Quanto a ideia do Gente Daqui faz sentido para sua vida?
 
 - 1 — Nada a ver;
 - 2;
@@ -143,13 +153,13 @@ O Gente Daqui é uma proposta para aproximar jovens do bairro de oportunidades r
 - 4;
 - 5 — Faz muito sentido.
 
-### 14. Se esse programa existisse, você participaria?
+### 15. Se esse programa existisse, você participaria?
 
 - Sim, com certeza;
 - Talvez, depende de como funciona;
 - Não, não é pra mim.
 
-### 15. Qual seria o melhor jeito de te acompanhar no dia a dia?
+### 16. Qual seria o melhor jeito de te acompanhar no dia a dia?
 
 - WhatsApp (conversa direta);
 - Grupo de WhatsApp com outras pessoas;
@@ -157,7 +167,24 @@ O Gente Daqui é uma proposta para aproximar jovens do bairro de oportunidades r
 - Encontro presencial no COMPAZ;
 - Outro.
 
-### 16. Em uma frase: o que faria você desistir de continuar em um programa assim?
+### 17. O que mais ajudaria você a continuar participando do Gente Daqui?
+
+_Marque até 2 alternativas._
+
+- Perceber resultados nos primeiros passos;
+- Ter alguém acompanhando de perto;
+- Poder participar em horários flexíveis;
+- Receber indicações de oportunidades reais;
+- Participar junto com outras pessoas do bairro.
+
+### 18. Com que frequência você gostaria de receber acompanhamento?
+
+- Toda semana;
+- A cada 15 dias;
+- Uma vez por mês;
+- Somente quando eu precisar.
+
+### 19. Em uma frase: o que faria você desistir de continuar em um programa assim?
 
 Resposta livre e opcional.
 

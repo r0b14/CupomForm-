@@ -87,7 +87,15 @@ export class AdminService {
       this.prisma.question.findMany({
         where: { campaignId: campaign.id },
         orderBy: { position: 'asc' },
-        select: { key: true, label: true, type: true, required: true, options: true },
+        select: {
+          key: true,
+          label: true,
+          type: true,
+          required: true,
+          options: true,
+          maxSelections: true,
+          section: true,
+        },
       }),
       this.prisma.submission.findMany({
         where: { campaignId: campaign.id },
@@ -101,8 +109,8 @@ export class AdminService {
     const selected = filterEntries.length
       ? submissions.filter(({ answers }) =>
           filterEntries.every(([key, accepted]) => {
-            const value = this.answerValue(answers, key);
-            return value !== undefined && accepted.includes(value);
+            const values = this.answerValues(answers, key);
+            return values.some((value) => accepted.includes(value));
           }),
         )
       : submissions;
@@ -115,9 +123,10 @@ export class AdminService {
       filters,
       questions: questions.map((question) => {
         const options = this.questionOptions(question.options);
-        const values = selected
-          .map(({ answers }) => this.answerValue(answers, question.key))
-          .filter((value): value is string => Boolean(value));
+        const responseValues = selected
+          .map(({ answers }) => this.answerValues(answers, question.key))
+          .filter((values) => values.length > 0);
+        const values = responseValues.flat();
 
         const counts = new Map<string, number>();
         values.forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1));
@@ -128,7 +137,9 @@ export class AdminService {
           type: question.type,
           required: question.required,
           options,
-          answered: values.length,
+          maxSelections: question.maxSelections,
+          section: question.section,
+          answered: responseValues.length,
         };
 
         // Texto livre não tem distribuição útil: cada resposta é única.
@@ -226,10 +237,14 @@ export class AdminService {
     return Math.round((sum / numbers.length) * 100) / 100;
   }
 
-  private answerValue(answers: Prisma.JsonValue, key: string): string | undefined {
-    if (!answers || Array.isArray(answers) || typeof answers !== 'object') return undefined;
+  private answerValues(answers: Prisma.JsonValue, key: string): string[] {
+    if (!answers || Array.isArray(answers) || typeof answers !== 'object') return [];
     const value = (answers as Prisma.JsonObject)[key];
-    return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+    if (typeof value === 'string' && value.trim()) return [value.trim()];
+    if (!Array.isArray(value)) return [];
+    return value
+      .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+      .map((item) => item.trim());
   }
 
   async getCampaign() {

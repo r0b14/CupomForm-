@@ -3,6 +3,8 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   Campaign,
+  Answers,
+  AnswerValue,
   FieldErrors,
   Question,
   Result,
@@ -30,11 +32,9 @@ import { SoldOutScreen } from "./components/SoldOutScreen";
 import { UnavailableScreen } from "./components/UnavailableScreen";
 import { SplashScreen } from "./components/SplashScreen";
 
-const QUESTION_PAGE_SIZE = 3;
-
 export function CampaignForm() {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Answers>({});
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [consent, setConsent] = useState(false);
@@ -56,26 +56,29 @@ export function CampaignForm() {
     [campaign],
   );
 
-  const questionPages = useMemo(() => {
+  const questionSections = useMemo(() => {
     if (!campaign) return [] as Question[][];
-    const paged = campaign.questions.filter(
-      (question) => question.key !== NEIGHBORHOOD_QUESTION_KEY,
-    );
-    return Array.from(
-      { length: Math.ceil(paged.length / QUESTION_PAGE_SIZE) },
-      (_, index) =>
-        paged.slice(
-          index * QUESTION_PAGE_SIZE,
-          (index + 1) * QUESTION_PAGE_SIZE,
-        ),
-    );
+    const grouped = new Map<number, Question[]>();
+    campaign.questions
+      .filter((question) => question.key !== NEIGHBORHOOD_QUESTION_KEY)
+      .forEach((question) => {
+        const current = grouped.get(question.section) ?? [];
+        current.push(question);
+        grouped.set(question.section, current);
+      });
+    return [...grouped.entries()]
+      .sort(([left], [right]) => left - right)
+      .map(([, questions]) => questions);
   }, [campaign]);
 
-  const totalSteps = questionPages.length + 2;
+  const totalSteps = questionSections.length + 2;
   const isIdentityStep = step === 1;
   const isConsentStep = step === totalSteps;
   const activeQuestions =
-    !isIdentityStep && !isConsentStep ? (questionPages[step - 2] ?? []) : [];
+    !isIdentityStep && !isConsentStep ? (questionSections[step - 2] ?? []) : [];
+  const neighborhoodAnswer = neighborhoodQuestion
+    ? answers[neighborhoodQuestion.key]
+    : undefined;
 
   useEffect(() => {
     let active = true;
@@ -137,7 +140,7 @@ export function CampaignForm() {
     window.scrollTo({ top: 0, left: 0 });
   }, [step, screen]);
 
-  function handleAnswerChange(key: string, value: string) {
+  function handleAnswerChange(key: string, value: AnswerValue) {
     setAnswers((current) => ({ ...current, [key]: value }));
     setErrors((current) => ({ ...current, [key]: "" }));
   }
@@ -284,9 +287,7 @@ export function CampaignForm() {
               errors={errors}
               neighborhood={neighborhoodQuestion}
               neighborhoodValue={
-                neighborhoodQuestion
-                  ? (answers[neighborhoodQuestion.key] ?? "")
-                  : ""
+                typeof neighborhoodAnswer === "string" ? neighborhoodAnswer : ""
               }
               onNeighborhoodChange={(val) => {
                 if (neighborhoodQuestion) {
@@ -350,7 +351,7 @@ export function CampaignForm() {
                 onClick={handleNextStep}
                 className="h-14 flex-1 rounded-2xl bg-[#4338ca] text-base font-extrabold text-white transition-all duration-150 hover:bg-[#3730a3] active:scale-[0.99] shadow-md hover:shadow-lg"
               >
-                Avançar
+                {isIdentityStep ? "Iniciar" : "Avançar"}
               </button>
             )}
           </div>

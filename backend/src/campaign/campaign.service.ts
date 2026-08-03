@@ -16,7 +16,15 @@ export class CampaignService {
         privacyText: true,
         questions: {
           orderBy: { position: 'asc' },
-          select: { key: true, label: true, type: true, required: true, options: true },
+          select: {
+            key: true,
+            label: true,
+            type: true,
+            required: true,
+            options: true,
+            maxSelections: true,
+            section: true,
+          },
         },
       },
     });

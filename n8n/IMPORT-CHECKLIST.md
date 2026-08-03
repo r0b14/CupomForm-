@@ -4,6 +4,22 @@ Arquivo para importar: [`workflows/cupomform-delivery.json`](workflows/cupomform
 
 Depois da importação, confirme que o workflow se chama **CupomForm - Evolution + Google Sheets**. Instalações anteriores podem conter um fluxo obsoleto chamado **CupomForm - Entrega de cupom**; mantenha-o inativo.
 
+## Atualização do formulário de 19 perguntas
+
+Antes de reimportar o workflow em uma instalação que ainda usa a versão antiga:
+
+1. Desative temporariamente o workflow `CupomFormDelivery01`.
+2. Na aba `entregas`, preserve a linha 1 e apague todas as linhas de dados a partir da linha 2.
+3. Na aba `respostas`, apague todas as linhas existentes e cole na célula `A1` a linha de cabeçalhos abaixo. Os valores estão separados por tabulação e devem ocupar 27 colunas:
+
+   ```text
+   submission_id	name	phone	created_at	coupon_code	delivery_status	idade	bairro	situacao_atual	oportunidade_recente	barreira	motivo_participacao	area_interesse	apoio_primeiro_passo	tempo_preparacao	referencia_local	referencia_nome_profissao	influencia_decisao	confianca_programa	sentido_para_vida	participaria	canal_acompanhamento	fator_permanencia	frequencia_acompanhamento	motivo_desistencia	answers_json	synced_at
+   ```
+
+4. Reimporte [`workflows/cupomform-delivery.json`](workflows/cupomform-delivery.json), substituindo o workflow de ID `CupomFormDelivery01`.
+5. Confirme novamente a credencial Google nos nós `Google Sheets - auditoria` e `Google Sheets - espelho de respostas`.
+6. Ative o workflow e execute `Sincronizar agora` uma vez. Com o banco recém-limpo, a aba `respostas` deve continuar somente com o cabeçalho.
+
 ## Antes de importar
 
 1. Crie uma planilha Google com duas abas. Na aba `entregas`, use a primeira linha exatamente assim:
@@ -12,7 +28,7 @@ Depois da importação, confirme que o workflow se chama **CupomForm - Evolution
 
    Na aba `respostas`, use a primeira linha exatamente assim:
 
-   `submission_id`, `name`, `phone`, `created_at`, `coupon_code`, `delivery_status`, `idade`, `bairro`, `situacao_atual`, `oportunidade_recente`, `barreira`, `motivo_participacao`, `area_interesse`, `apoio_primeiro_passo`, `tempo_preparacao`, `referencia_local`, `referencia_nome_profissao`, `confianca_programa`, `sentido_para_vida`, `participaria`, `canal_acompanhamento`, `motivo_desistencia`, `answers_json`, `synced_at`
+   `submission_id`, `name`, `phone`, `created_at`, `coupon_code`, `delivery_status`, `idade`, `bairro`, `situacao_atual`, `oportunidade_recente`, `barreira`, `motivo_participacao`, `area_interesse`, `apoio_primeiro_passo`, `tempo_preparacao`, `referencia_local`, `referencia_nome_profissao`, `influencia_decisao`, `confianca_programa`, `sentido_para_vida`, `participaria`, `canal_acompanhamento`, `fator_permanencia`, `frequencia_acompanhamento`, `motivo_desistencia`, `answers_json`, `synced_at`
 
 2. Na workspace do n8n, cadastre a credencial **Google Service Account API** com o e-mail e a chave privada do JSON baixado no Google Cloud. Compartilhe a planilha com o e-mail da conta de serviço. Ela é a única credencial escolhida visualmente no fluxo; nenhuma chave fica no JSON versionado.
 

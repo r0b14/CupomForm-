@@ -49,6 +49,89 @@ describe('SubmissionService', () => {
     ).rejects.toThrow(BadRequestException);
   });
 
+  it('deve aceitar e salvar respostas de múltipla escolha como lista', async () => {
+    const prisma = createPrismaMock();
+    const submissionCreate = vi.fn().mockResolvedValue({ id: 'submission-1' });
+    prisma.campaign.findFirst.mockResolvedValue({
+      id: 'campaign-1',
+      questions: [
+        {
+          key: 'areas',
+          label: 'Quais áreas?',
+          type: 'MULTIPLE_CHOICE',
+          required: true,
+          options: ['Tecnologia', 'Vendas', 'Logística'],
+          maxSelections: 2,
+        },
+      ],
+    });
+    prisma.$transaction.mockImplementation(async (callback: (tx: unknown) => unknown) =>
+      callback({
+        submission: { findUnique: vi.fn().mockResolvedValue(null), create: submissionCreate },
+        $queryRaw: vi.fn().mockResolvedValue([]),
+      }),
+    );
+
+    await new SubmissionService(prisma).create({
+      ...validDto,
+      answers: { areas: ['Tecnologia', 'Logística'] },
+    });
+
+    expect(submissionCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ answers: { areas: ['Tecnologia', 'Logística'] } }),
+      }),
+    );
+  });
+
+  it('deve rejeitar múltipla escolha acima do limite', async () => {
+    const prisma = createPrismaMock();
+    prisma.campaign.findFirst.mockResolvedValue({
+      id: 'campaign-1',
+      questions: [
+        {
+          key: 'areas',
+          label: 'Quais áreas?',
+          type: 'MULTIPLE_CHOICE',
+          required: true,
+          options: ['Tecnologia', 'Vendas', 'Logística'],
+          maxSelections: 2,
+        },
+      ],
+    });
+
+    await expect(
+      new SubmissionService(prisma).create({
+        ...validDto,
+        answers: { areas: ['Tecnologia', 'Vendas', 'Logística'] },
+      }),
+    ).rejects.toThrow('Escolha no máximo 2 opções');
+  });
+
+  it('deve rejeitar alternativa inexistente em múltipla escolha', async () => {
+    const prisma = createPrismaMock();
+    prisma.campaign.findFirst.mockResolvedValue({
+      id: 'campaign-1',
+      questions: [
+        {
+          key: 'areas',
+          label: 'Quais áreas?',
+          type: 'MULTIPLE_CHOICE',
+          required: true,
+          options: ['Tecnologia', 'Vendas'],
+          maxSelections: 2,
+        },
+      ],
+    });
+
+    await expect(
+      new SubmissionService(prisma).create({
+        ...validDto,
+        answers: { areas: ['Alternativa inventada'] },
+      }),
+    ).rejects.toThrow('não é válida');
+  });
+
   it('deve devolver o mesmo cupom para um telefone já cadastrado', async () => {
     const prisma = createPrismaMock();
     prisma.campaign.findFirst.mockResolvedValue({ id: 'campaign-1', questions: [] });

@@ -1,4 +1,4 @@
-// Next.js configuration for the Gemini-owned frontend.
+// Next.js configuration for the CupomForm frontend.
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {

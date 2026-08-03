@@ -8,7 +8,7 @@
 ## Evidências
 
 - Codex: modelo/rota, commit/diff e comandos:
-- Gemini: modelo/rota, commit/diff e build:
+- Frontend Codex: rota, commit/diff e build:
 - Teste manual/E2E:
 
 ## Aceite

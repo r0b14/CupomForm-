@@ -27,6 +27,29 @@ const STEP_COPY: Record<StepKind, { title: string; subtitle: string }> = {
   },
 };
 
+const QUESTION_STEP_COPY: Record<number, { title: string; subtitle: string }> = {
+  2: {
+    title: "Sua realidade hoje",
+    subtitle: "Conte um pouco sobre seu momento e o acesso a oportunidades.",
+  },
+  3: {
+    title: "Seus caminhos profissionais",
+    subtitle: "Escolha interesses, objetivos e o apoio que faria diferença agora.",
+  },
+  4: {
+    title: "Referências do seu bairro",
+    subtitle: "Queremos entender quem inspira e influencia suas escolhas.",
+  },
+  5: {
+    title: "Conheça o Gente Daqui",
+    subtitle: "Veja como a proposta funciona e diga o que ela representa para você.",
+  },
+  6: {
+    title: "Como seguir junto",
+    subtitle: "Ajude a definir um acompanhamento que seja útil e possível no dia a dia.",
+  },
+};
+
 export function FormShell({
   step,
   totalSteps,
@@ -34,7 +57,10 @@ export function FormShell({
   previewMode,
   children,
 }: FormShellProps) {
-  const copy = STEP_COPY[stepKind];
+  const copy =
+    stepKind === "questions"
+      ? (QUESTION_STEP_COPY[step] ?? STEP_COPY.questions)
+      : STEP_COPY[stepKind];
   return (
     <main className="min-h-screen bg-[linear-gradient(160deg,#2a2470_0%,#171545_55%,#0b0a1f_100%)] px-5 py-11 font-[family-name:var(--font-manrope)]">
       <section className="mx-auto w-full max-w-[390px] overflow-hidden rounded-3xl bg-white shadow-[0_24px_60px_rgba(10,8,40,.35),0_4px_16px_rgba(10,8,40,.25)] transition-all animate-card-in">

@@ -10,6 +10,7 @@ datasource db {
 
 enum QuestionType {
   SINGLE_CHOICE
+  MULTIPLE_CHOICE
   TEXT
   SCALE
 }
@@ -49,6 +50,8 @@ model Question {
   type       QuestionType
   required   Boolean      @default(true)
   options    Json?
+  maxSelections Int?
+  section    Int          @default(2)
   position   Int
   campaign   Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 

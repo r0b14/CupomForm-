@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "tasks": {
+    "explore": { "provider": "codex", "modelProfile": "fast", "mode": "read-only", "description": "Mapear o repositório e o impacto sem editar arquivos." },
+    "research": { "provider": "codex", "modelProfile": "fast", "mode": "read-only", "description": "Pesquisar e recomendar uma abordagem curta." },
+    "review": { "provider": "codex", "modelProfile": "default", "mode": "read-only", "description": "Revisar um diff procurando regressões e casos ausentes." },
+    "test-plan": { "provider": "codex", "modelProfile": "default", "mode": "read-only", "description": "Gerar cenários de teste sem modificar código." },
+    "frontend-design": { "provider": "codex", "modelProfile": "deep", "mode": "read-only", "description": "Definir direção visual e comportamento do frontend." },
+    "frontend-implement": { "provider": "codex", "modelProfile": "default", "mode": "workspace-write", "description": "Implementar e validar alterações no frontend." },
+    "implement": { "provider": "codex", "modelProfile": "default", "mode": "workspace-write", "description": "Implementar uma mudança delimitada, testar e reportar." },
+    "debug": { "provider": "codex", "modelProfile": "default", "mode": "workspace-write", "description": "Reproduzir, corrigir e verificar um defeito." },
+    "security": { "provider": "codex", "modelProfile": "deep", "mode": "read-only", "description": "Analisar segurança sem aplicar correções." },
+    "architecture": { "provider": "codex", "modelProfile": "deep", "mode": "read-only", "description": "Definir contratos, riscos e critérios de aceite." },
+    "sprint-plan": { "provider": "codex", "modelProfile": "deep", "mode": "read-only", "description": "Planejar sprint, escopo e aceite." }
+  }
+}
