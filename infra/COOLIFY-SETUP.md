@@ -105,7 +105,7 @@ Estas ações não devem ser delegadas nem registradas no Git, pois envolvem con
 5. Informar no Coolify os Dockerfiles e portas da tabela da seção 1.
 6. Importar o JSON do workflow na workspace n8n e selecionar a credencial Google Sheets.
 7. Informar diretamente no n8n a URL, instância e chave da Evolution API.
-8. Rodar o seed uma única vez dentro do container da API: `npm run prisma:seed -w @cupomform/backend`. Se o terminal do Coolify não funcionar, conecte por SSH, localize a API com `sudo docker ps` e execute com `sudo docker exec`.
+8. Confirmar nos logs da API que `prisma:deploy` e `prisma:seed` terminaram antes do NestJS iniciar. O Dockerfile executa ambos automaticamente e força `SEED_DEV_COUPONS=false`.
 9. Importar o lote real de cupons; os códigos `GENTE-DEV-*` do seed servem apenas para teste/homologação.
 10. Fazer um envio para seu próprio número e conferir API, n8n, WhatsApp, PostgreSQL e Sheets antes de divulgar o QR Code.
 
@@ -113,7 +113,7 @@ Estas ações não devem ser delegadas nem registradas no Git, pois envolvem con
 
 - PostgreSQL 16: publicado e saudável.
 - API: `https://api-cupom.r0b14.com`, publicada e saudável.
-- Campanha `gente-daqui`: seed aplicado com 12 perguntas e três cupons de homologação.
+- Campanha `gente-daqui`: seed aplicado com 19 perguntas distribuídas em seis seções de conteúdo; identificação e consentimento completam as sete etapas do formulário.
 - Frontend: `https://cupom.r0b14.com`, publicado e saudável.
 - Painel administrativo: `https://cupom.r0b14.com/admin`, integrado à API e validado com autenticação em produção.
 - n8n: `https://n8n.r0b14.com`, saudável; workflow `CupomFormDelivery01` ativo e validado de ponta a ponta.

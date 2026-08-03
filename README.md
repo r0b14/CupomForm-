@@ -78,9 +78,9 @@ Em Docker/Coolify, o caminho precisa existir dentro do container da API. Prefira
 
 ## Editar as perguntas da campanha sem quebrar nada
 
-As perguntas da campanha ativa (`gente-daqui`) são definidas em [backend/prisma/seed.ts](backend/prisma/seed.ts) e aplicadas com `npm run prisma:seed -w @cupomform/backend` (upsert idempotente por `key` — rodar de novo é seguro). Não edite perguntas direto no PostgreSQL nem no Google Sheets.
+As perguntas da campanha ativa (`gente-daqui`) são definidas em [backend/prisma/seed.ts](backend/prisma/seed.ts) e aplicadas por um upsert idempotente por `key`. O container da API executa migração e seed automaticamente antes de iniciar; rodar o seed novamente também é seguro. Não edite perguntas direto no PostgreSQL nem no Google Sheets.
 
-> **Editar o seed não muda o ambiente publicado.** As perguntas vêm do banco, não do build: enquanto o seed não for executado no PostgreSQL daquele ambiente, o formulário continua exibindo a versão antiga — inclusive o `type`, que decide se a pergunta aparece como lista de opções ou como barra deslizante. Depois de fazer merge de uma mudança em `seed.ts`, rode o seed no ambiente correspondente e confirme com `curl -s https://api-cupom.r0b14.com/api/campaign`.
+> **O deploy precisa concluir o seed.** As perguntas vêm do banco, não diretamente do build. O Dockerfile executa o seed automaticamente e só inicia a API se ele terminar com sucesso. Depois de publicar uma mudança em `seed.ts`, confirme o resultado em `https://api-cupom.r0b14.com/api/campaign`.
 
 Regras do schema (`backend/prisma/schema.prisma`) que precisam ser respeitadas:
 

@@ -53,5 +53,5 @@ Correção crítica de produção nasce de `main` em `fix/<nome>`, volta para `m
 - Um ambiente de homologação duradouro deve ter PostgreSQL e credenciais próprios.
 - Enquanto `development` usar a infraestrutura de produção, não teste importação, alteração de campanha ou reenvio com dados descartáveis.
 - Migrações Prisma nunca são reescritas depois de aplicadas; sempre crie uma nova migração.
-- Migração e seed são passos distintos. `prisma:deploy` roda sozinho a cada boot do container, mas o seed **não**: se um PR alterou `backend/prisma/seed.ts` (texto, opções, `position` ou `type` de uma pergunta), rode `npm run prisma:seed -w @cupomform/backend` no ambiente depois do deploy, senão o formulário publicado continua servindo os dados antigos.
+- Migração e seed são passos distintos, mas o container da API executa ambos em sequência antes de iniciar o NestJS. Assim, alterações versionadas em `backend/prisma/seed.ts` chegam ao banco no mesmo deploy. Em uma recuperação manual, rode `SEED_DEV_COUPONS=false npm run prisma:seed -w @cupomform/backend` dentro do container.
 - `SEED_DEV_COUPONS` só existe em ambientes locais/descartáveis. Sem ela, o seed não cria os cupons `GENTE-DEV-*` e é seguro rodar em produção.
