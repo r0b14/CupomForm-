@@ -34,18 +34,18 @@ Antes de reimportar o workflow em uma instalação que ainda usa a versão antig
 
 3. Defina estas variáveis de ambiente no serviço n8n. Os valores marcados como “igual” devem ser idênticos aos do backend:
 
-   | Variável | Valor |
-   | --- | --- |
-   | `N8N_SHARED_SECRET` | segredo longo, igual ao backend |
-   | `INTERNAL_CALLBACK_SECRET` | segredo longo diferente, igual ao backend |
-   | `ADMIN_API_TOKEN` | token administrativo, igual ao backend e ao BFF do frontend |
-   | `CUPOMFORM_API_URL` | URL pública da API, sem `/api` no fim |
-   | `EVOLUTION_API_URL` | URL base da Evolution API, sem barra final |
-   | `EVOLUTION_INSTANCE` | nome da instância Evolution |
-   | `EVOLUTION_API_KEY` | chave da Evolution API |
-   | `GOOGLE_SHEETS_DOCUMENT_ID` | ID da planilha (trecho entre `/d/` e `/edit`) |
-   | `GOOGLE_SHEETS_SHEET_NAME` | nome da aba, por exemplo `entregas` |
-   | `GOOGLE_SHEETS_RESPONSES_SHEET_NAME` | nome da aba, por exemplo `respostas` |
+   | Variável                             | Valor                                                       |
+   | ------------------------------------ | ----------------------------------------------------------- |
+   | `N8N_SHARED_SECRET`                  | segredo longo, igual ao backend                             |
+   | `INTERNAL_CALLBACK_SECRET`           | segredo longo diferente, igual ao backend                   |
+   | `ADMIN_API_TOKEN`                    | token administrativo, igual ao backend e ao BFF do frontend |
+   | `CUPOMFORM_API_URL`                  | URL pública da API, sem `/api` no fim                       |
+   | `EVOLUTION_API_URL`                  | URL base da Evolution API, sem barra final                  |
+   | `EVOLUTION_INSTANCE`                 | nome da instância Evolution                                 |
+   | `EVOLUTION_API_KEY`                  | chave da Evolution API                                      |
+   | `GOOGLE_SHEETS_DOCUMENT_ID`          | ID da planilha (trecho entre `/d/` e `/edit`)               |
+   | `GOOGLE_SHEETS_SHEET_NAME`           | nome da aba, por exemplo `entregas`                         |
+   | `GOOGLE_SHEETS_RESPONSES_SHEET_NAME` | nome da aba, por exemplo `respostas`                        |
 
    Como este workflow usa `$env` nas expressões, configure também `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`. Faça isso apenas nesta instância controlada e importe somente workflows confiáveis.
 
